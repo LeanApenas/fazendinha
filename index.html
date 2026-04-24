@@ -10,6 +10,7 @@
         :root {
             --primary: #2f75b5;
             --success: #28a745;
+            --danger: #dc3545;
             --accent: #6f42c1;
             --bg: #f4f7f9;
         }
@@ -22,11 +23,10 @@
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1100px;
             margin: auto;
         }
 
-        /* Topo com Mês e Botão de Foto */
         .header-actions {
             background: white;
             padding: 15px;
@@ -38,7 +38,6 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
         }
 
-        /* Cartões de Totais */
         .dashboard-cards {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -69,7 +68,6 @@
             color: var(--primary);
         }
 
-        /* Tabela de Histórico */
         .history-section {
             background: white;
             padding: 20px;
@@ -97,7 +95,46 @@
             border-bottom: 1px solid #eee;
         }
 
-        /* Formulário de Lançamento */
+        /* Botões de Excluir */
+        .btn-delete {
+            background: none;
+            border: none;
+            color: #ccc;
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: 0.3s;
+        }
+
+        .btn-delete:hover {
+            color: var(--danger);
+        }
+
+        .confirm-box {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .btn-confirm {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+
+        .btn-cancel {
+            background: #666;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+
         .input-section {
             background: #fff;
             padding: 20px;
@@ -152,6 +189,10 @@
             padding: 10px;
             border-radius: 10px;
         }
+
+        .no-print {
+            display: inline-block;
+        }
     </style>
 </head>
 
@@ -199,6 +240,7 @@
                             <th>Vendedor</th>
                             <th>Pagamento</th>
                             <th>Valor</th>
+                            <th class="no-print" style="width: 50px;"></th>
                         </tr>
                     </thead>
                     <tbody id="listaVendas"></tbody>
@@ -231,43 +273,30 @@
     </div>
 
     <script>
-        // Carrega os dados ou cria um array vazio
         let vendas = JSON.parse(localStorage.getItem('bancoVendas')) || [];
-
-        // Ajusta o filtro para o mês atual
         const inputFiltro = document.getElementById('filtroMes');
         inputFiltro.value = new Date().toISOString().substring(0, 7);
 
         function adicionarVenda() {
             const prod = document.getElementById('produto').value;
             const val = parseFloat(document.getElementById('valor').value);
-            const vend = document.getElementById('vendedor').value;
-            const pag = document.getElementById('pagamento').value;
-
-            if (!prod || isNaN(val)) {
-                alert("Preencha o produto e o valor!");
-                return;
-            }
+            if (!prod || isNaN(val)) return alert("Preencha o produto e o valor!");
 
             const agora = new Date();
             const novaVenda = {
-                // Importante: Guardamos o mês e ano separadamente para o filtro não errar
+                id: Date.now(), // ID único para deletar com precisão
                 periodo: agora.toISOString().substring(0, 7),
                 dataHora: agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
                 produto: prod,
                 valor: val,
-                vendedor: vend,
-                pagamento: pag
+                vendedor: document.getElementById('vendedor').value,
+                pagamento: document.getElementById('pagamento').value
             };
 
             vendas.push(novaVenda);
             localStorage.setItem('bancoVendas', JSON.stringify(vendas));
-
-            // Limpa os campos
             document.getElementById('produto').value = '';
             document.getElementById('valor').value = '';
-
-            // Atualiza a lista na hora
             atualizarInterface();
         }
 
@@ -275,44 +304,65 @@
             const lista = document.getElementById('listaVendas');
             const mesSelecionado = inputFiltro.value;
             lista.innerHTML = '';
-
             let totais = { Geral: 0, Dinheiro: 0, Crédito: 0, Débito: 0 };
 
-            // Filtra as vendas que batem com o mês do calendário lá de cima
             const filtradas = vendas.filter(v => v.periodo === mesSelecionado);
 
-            // Mostra as mais recentes primeiro
-            filtradas.reverse().forEach(v => {
-                lista.innerHTML += `<tr>
-                <td style="font-size: 0.8em; color: #777;">${v.dataHora}</td>
+            filtradas.slice().reverse().forEach(v => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                <td style="font-size: 0.85em; color: #777;">${v.dataHora}</td>
                 <td>${v.produto}</td>
                 <td>${v.vendedor}</td>
                 <td>${v.pagamento}</td>
                 <td><strong>R$ ${v.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong></td>
-            </tr>`;
+                <td class="no-print" id="acao-${v.id}">
+                    <button class="btn-delete" onclick="prepararExclusao(${v.id})">🗑️</button>
+                </td>
+            `;
+                lista.appendChild(tr);
 
                 totais.Geral += v.valor;
                 totais[v.pagamento] += v.valor;
             });
 
-            // Atualiza os cartões coloridos
             document.getElementById('totalGeral').innerText = "R$ " + totais.Geral.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
             document.getElementById('totalDinheiro').innerText = "R$ " + totais.Dinheiro.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
             document.getElementById('totalCredito').innerText = "R$ " + totais.Crédito.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
             document.getElementById('totalDebito').innerText = "R$ " + totais.Débito.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
         }
 
+        // Função que mostra os botões de confirmação
+        function prepararExclusao(id) {
+            const celula = document.getElementById(`acao-${id}`);
+            celula.innerHTML = `
+            <div class="confirm-box">
+                <button class="btn-confirm" onclick="confirmarExclusao(${id})">Sim</button>
+                <button class="btn-cancel" onclick="atualizarInterface()">Não</button>
+            </div>
+        `;
+        }
+
+        function confirmarExclusao(id) {
+            vendas = vendas.filter(v => v.id !== id);
+            localStorage.setItem('bancoVendas', JSON.stringify(vendas));
+            atualizarInterface();
+        }
+
         function gerarImagem() {
-            const area = document.getElementById('area-foto');
-            html2canvas(area, { scale: 2 }).then(canvas => {
+            // Esconde botões de delete da imagem
+            const botoes = document.querySelectorAll('.no-print');
+            botoes.forEach(b => b.style.opacity = '0');
+
+            html2canvas(document.getElementById('area-foto'), { scale: 2 }).then(canvas => {
                 const link = document.createElement('a');
                 link.download = `Relatorio_${inputFiltro.value}.png`;
                 link.href = canvas.toDataURL();
                 link.click();
+                botoes.forEach(b => b.style.opacity = '1');
             });
         }
 
-        // Roda a função assim que abre a página para mostrar o que já tem salvo
         atualizarInterface();
     </script>
 
