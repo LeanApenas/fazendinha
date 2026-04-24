@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Beatriz & Milena</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --primary: #2f75b5;
+            --success: #28a745;
+            --accent: #6f42c1;
+            --bg: #f4f7f9;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: var(--bg);
+            margin: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        /* Topo com Mês e Botão de Foto */
+        .header-actions {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Cartões de Totais */
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            border-top: 5px solid var(--primary);
+        }
+
+        .card h3 {
+            margin: 0;
+            font-size: 0.8em;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .card p {
+            margin: 10px 0 0;
+            font-size: 1.8em;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        /* Tabela de Histórico */
+        .history-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th {
+            background: #f8f9fa;
+            color: #555;
+            text-align: left;
+            padding: 12px;
+            border-bottom: 2px solid #eee;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        /* Formulário de Lançamento */
+        .input-section {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: flex-end;
+            border: 1px solid #ddd;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        label {
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        input,
+        select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-add {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-img {
+            background: var(--accent);
+            color: white;
+        }
+
+        #area-foto {
+            padding: 10px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="header-actions">
+            <div>
+                <label>Mês de Referência:</label>
+                <input type="month" id="filtroMes" onchange="atualizarInterface()">
+            </div>
+            <button class="btn-img" onclick="gerarImagem()">📸 Gerar Foto do Relatório</button>
+        </div>
+
+        <div id="area-foto">
+            <h2 style="text-align: center; color: var(--primary);">Relatório Beatriz & Milena</h2>
+
+            <div class="dashboard-cards">
+                <div class="card">
+                    <h3>Total Geral</h3>
+                    <p id="totalGeral">R$ 0,00</p>
+                </div>
+                <div class="card">
+                    <h3>Dinheiro</h3>
+                    <p id="totalDinheiro">R$ 0,00</p>
+                </div>
+                <div class="card">
+                    <h3>Crédito</h3>
+                    <p id="totalCredito">R$ 0,00</p>
+                </div>
+                <div class="card">
+                    <h3>Débito</h3>
+                    <p id="totalDebito">R$ 0,00</p>
+                </div>
+            </div>
+
+            <div class="history-section">
+                <h3 style="margin-top: 0; color: #666; font-size: 1em;">Histórico Detalhado</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Produto</th>
+                            <th>Vendedor</th>
+                            <th>Pagamento</th>
+                            <th>Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaVendas"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="input-section">
+            <div class="input-group"><label>Produto</label><input type="text" id="produto" placeholder="Nome"></div>
+            <div class="input-group"><label>Valor (R$)</label><input type="number" id="valor" step="0.01"
+                    placeholder="0,00"></div>
+            <div class="input-group">
+                <label>Vendedor</label>
+                <select id="vendedor">
+                    <option value="Beatriz">Beatriz</option>
+                    <option value="Milena">Milena</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Pagamento</label>
+                <select id="pagamento">
+                    <option value="Dinheiro">Dinheiro</option>
+                    <option value="Crédito">Crédito</option>
+                    <option value="Débito">Débito</option>
+                </select>
+            </div>
+            <button class="btn-add" onclick="adicionarVenda()">Registrar Venda</button>
+        </div>
+
+    </div>
+
+    <script>
+        // Carrega os dados ou cria um array vazio
+        let vendas = JSON.parse(localStorage.getItem('bancoVendas')) || [];
+
+        // Ajusta o filtro para o mês atual
+        const inputFiltro = document.getElementById('filtroMes');
+        inputFiltro.value = new Date().toISOString().substring(0, 7);
+
+        function adicionarVenda() {
+            const prod = document.getElementById('produto').value;
+            const val = parseFloat(document.getElementById('valor').value);
+            const vend = document.getElementById('vendedor').value;
+            const pag = document.getElementById('pagamento').value;
+
+            if (!prod || isNaN(val)) {
+                alert("Preencha o produto e o valor!");
+                return;
+            }
+
+            const agora = new Date();
+            const novaVenda = {
+                // Importante: Guardamos o mês e ano separadamente para o filtro não errar
+                periodo: agora.toISOString().substring(0, 7),
+                dataHora: agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+                produto: prod,
+                valor: val,
+                vendedor: vend,
+                pagamento: pag
+            };
+
+            vendas.push(novaVenda);
+            localStorage.setItem('bancoVendas', JSON.stringify(vendas));
+
+            // Limpa os campos
+            document.getElementById('produto').value = '';
+            document.getElementById('valor').value = '';
+
+            // Atualiza a lista na hora
+            atualizarInterface();
+        }
+
+        function atualizarInterface() {
+            const lista = document.getElementById('listaVendas');
+            const mesSelecionado = inputFiltro.value;
+            lista.innerHTML = '';
+
+            let totais = { Geral: 0, Dinheiro: 0, Crédito: 0, Débito: 0 };
+
+            // Filtra as vendas que batem com o mês do calendário lá de cima
+            const filtradas = vendas.filter(v => v.periodo === mesSelecionado);
+
+            // Mostra as mais recentes primeiro
+            filtradas.reverse().forEach(v => {
+                lista.innerHTML += `<tr>
+                <td style="font-size: 0.8em; color: #777;">${v.dataHora}</td>
+                <td>${v.produto}</td>
+                <td>${v.vendedor}</td>
+                <td>${v.pagamento}</td>
+                <td><strong>R$ ${v.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong></td>
+            </tr>`;
+
+                totais.Geral += v.valor;
+                totais[v.pagamento] += v.valor;
+            });
+
+            // Atualiza os cartões coloridos
+            document.getElementById('totalGeral').innerText = "R$ " + totais.Geral.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+            document.getElementById('totalDinheiro').innerText = "R$ " + totais.Dinheiro.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+            document.getElementById('totalCredito').innerText = "R$ " + totais.Crédito.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+            document.getElementById('totalDebito').innerText = "R$ " + totais.Débito.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+        }
+
+        function gerarImagem() {
+            const area = document.getElementById('area-foto');
+            html2canvas(area, { scale: 2 }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `Relatorio_${inputFiltro.value}.png`;
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        }
+
+        // Roda a função assim que abre a página para mostrar o que já tem salvo
+        atualizarInterface();
+    </script>
+
+</body>
+
+</html>
