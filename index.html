@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Sistema Beatriz & Milena</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -20,7 +20,7 @@
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
             background-color: var(--bg);
-            margin: 20px;
+            margin: 10px;
             color: #333;
         }
 
@@ -29,11 +29,12 @@
             margin: auto;
         }
 
+        /* Ajuste do topo para Celular */
         .header-actions {
             background: white;
             padding: 15px;
             border-radius: 8px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -44,133 +45,115 @@
 
         .button-group {
             display: flex;
-            gap: 10px;
+            gap: 8px;
+            width: 100%;
+            justify-content: center;
         }
 
+        .button-group button {
+            flex: 1;
+            padding: 10px 5px;
+            font-size: 0.9em;
+        }
+
+        /* Dashboard Cards Responsivos */
         .dashboard-cards {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 25px;
+            grid-template-columns: repeat(2, 1fr);
+            /* 2 colunas no celular */
+            gap: 10px;
+            margin-bottom: 20px;
         }
 
         .card {
             background: white;
-            padding: 20px;
+            padding: 15px 10px;
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             text-align: center;
-            border-top: 5px solid var(--primary);
+            border-top: 4px solid var(--primary);
         }
 
         .card h3 {
             margin: 0;
-            font-size: 0.8em;
+            font-size: 0.7em;
             color: #666;
             text-transform: uppercase;
         }
 
         .card p {
-            margin: 10px 0 0;
-            font-size: 1.8em;
+            margin: 5px 0 0;
+            font-size: 1.2em;
             font-weight: bold;
             color: var(--primary);
         }
 
+        /* Tabela Responsiva */
         .history-section {
             background: white;
-            padding: 20px;
+            padding: 15px;
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            margin-bottom: 30px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            /* Permite rolar pro lado se a tabela for grande */
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
+            min-width: 400px;
         }
 
         th {
             background: #f8f9fa;
             color: #555;
             text-align: left;
-            padding: 12px;
+            padding: 10px;
+            font-size: 0.8em;
             border-bottom: 2px solid #eee;
         }
 
         td {
-            padding: 12px;
+            padding: 10px;
             border-bottom: 1px solid #eee;
+            font-size: 0.85em;
         }
 
-        .btn-delete {
-            background: none;
-            border: none;
-            color: #ccc;
-            cursor: pointer;
-            font-size: 1.2em;
-        }
-
-        .confirm-box {
-            display: flex;
-            gap: 5px;
-        }
-
-        .btn-confirm {
-            background: var(--danger);
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.8em;
-        }
-
-        .btn-cancel {
-            background: #666;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.8em;
-        }
-
+        /* Formulário de Lançamento Responsivo */
         .input-section {
             background: #fff;
-            padding: 20px;
+            padding: 15px;
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            align-items: flex-end;
+            flex-direction: column;
+            gap: 12px;
             border: 1px solid #ddd;
         }
 
         .input-group {
             display: flex;
             flex-direction: column;
-            flex: 1;
-            min-width: 150px;
+            width: 100%;
         }
 
         label {
             font-size: 0.8em;
             font-weight: bold;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
 
         input,
         select {
-            padding: 10px;
+            padding: 12px;
             border: 1px solid #ccc;
             border-radius: 6px;
+            font-size: 16px;
+            /* Evita zoom no iPhone */
         }
 
         button {
-            padding: 12px 20px;
             border: none;
             border-radius: 6px;
             cursor: pointer;
@@ -178,13 +161,12 @@
             transition: 0.2s;
         }
 
-        button:hover {
-            opacity: 0.9;
-        }
-
         .btn-add {
             background: var(--success);
             color: white;
+            padding: 15px;
+            width: 100%;
+            font-size: 1.1em;
         }
 
         .btn-img {
@@ -197,8 +179,33 @@
             color: white;
         }
 
+        /* Estilos para o PC (Telas maiores que 768px) */
+        @media (min-width: 768px) {
+            .dashboard-cards {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .input-section {
+                flex-direction: row;
+                align-items: flex-end;
+            }
+
+            .button-group {
+                width: auto;
+            }
+
+            .btn-add {
+                width: auto;
+                padding: 12px 20px;
+            }
+
+            body {
+                margin: 20px;
+            }
+        }
+
         #area-foto {
-            padding: 10px;
+            padding: 5px;
             border-radius: 10px;
         }
     </style>
@@ -209,22 +216,23 @@
     <div class="container">
 
         <div class="header-actions">
-            <div>
-                <label>Mês de Referência:</label>
+            <div style="width: 100%; text-align: center; margin-bottom: 5px;">
+                <label>Mês:</label>
                 <input type="month" id="filtroMes" onchange="atualizarInterface()">
             </div>
             <div class="button-group">
-                <button class="btn-pdf" onclick="gerarPDF()">📄 Gerar PDF</button>
-                <button class="btn-img" onclick="gerarImagem()">📸 Gerar Foto</button>
+                <button class="btn-pdf" onclick="gerarPDF()">📄 PDF</button>
+                <button class="btn-img" onclick="gerarImagem()">📸 Foto</button>
             </div>
         </div>
 
         <div id="area-foto">
-            <h2 style="text-align: center; color: var(--primary);">Relatório Beatriz & Milena</h2>
+            <h2 style="text-align: center; color: var(--primary); font-size: 1.2em; margin-bottom: 15px;">Relatório
+                Beatriz & Milena</h2>
 
             <div class="dashboard-cards">
                 <div class="card">
-                    <h3>Total Geral</h3>
+                    <h3>Total</h3>
                     <p id="totalGeral">R$ 0,00</p>
                 </div>
                 <div class="card">
@@ -242,16 +250,15 @@
             </div>
 
             <div class="history-section">
-                <h3 style="margin-top: 0; color: #666; font-size: 1em;">Histórico Detalhado</h3>
                 <table>
                     <thead>
                         <tr>
                             <th>Data</th>
-                            <th>Produto</th>
-                            <th>Vendedor</th>
-                            <th>Pagamento</th>
+                            <th>Prod.</th>
+                            <th>Vend.</th>
+                            <th>Pgto.</th>
                             <th>Valor</th>
-                            <th class="no-print" style="width: 50px;"></th>
+                            <th class="no-print"></th>
                         </tr>
                     </thead>
                     <tbody id="listaVendas"></tbody>
@@ -260,23 +267,27 @@
         </div>
 
         <div class="input-section">
-            <div class="input-group"><label>Produto</label><input type="text" id="produto" placeholder="Nome"></div>
-            <div class="input-group"><label>Valor (R$)</label><input type="number" id="valor" step="0.01"
-                    placeholder="0,00"></div>
-            <div class="input-group">
-                <label>Vendedor</label>
-                <select id="vendedor">
-                    <option value="Beatriz">Beatriz</option>
-                    <option value="Milena">Milena</option>
-                </select>
+            <div style="display: flex; gap: 10px;">
+                <div class="input-group"><label>Produto</label><input type="text" id="produto" placeholder="Nome"></div>
+                <div class="input-group" style="flex: 0.5;"><label>Valor</label><input type="number" id="valor"
+                        step="0.01" placeholder="0,00"></div>
             </div>
-            <div class="input-group">
-                <label>Pagamento</label>
-                <select id="pagamento">
-                    <option value="Dinheiro">Dinheiro</option>
-                    <option value="Crédito">Crédito</option>
-                    <option value="Débito">Débito</option>
-                </select>
+            <div style="display: flex; gap: 10px;">
+                <div class="input-group">
+                    <label>Vendedor</label>
+                    <select id="vendedor">
+                        <option value="Beatriz">Beatriz</option>
+                        <option value="Milena">Milena</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Pagamento</label>
+                    <select id="pagamento">
+                        <option value="Dinheiro">Dinheiro</option>
+                        <option value="Crédito">Crédito</option>
+                        <option value="Débito">Débito</option>
+                    </select>
+                </div>
             </div>
             <button class="btn-add" onclick="adicionarVenda()">Registrar Venda</button>
         </div>
@@ -297,7 +308,7 @@
             vendas.push({
                 id: Date.now(),
                 periodo: agora.toISOString().substring(0, 7),
-                dataHora: agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+                dataHora: agora.toLocaleDateString('pt-BR').substring(0, 5) + ' ' + agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
                 produto: prod, valor: val, vendedor: document.getElementById('vendedor').value, pagamento: document.getElementById('pagamento').value
             });
 
@@ -315,12 +326,12 @@
 
             filtradas.slice().reverse().forEach(v => {
                 lista.innerHTML += `<tr>
-                <td style="font-size: 0.85em; color: #777;">${v.dataHora}</td>
+                <td style="color: #777;">${v.dataHora}</td>
                 <td>${v.produto}</td>
                 <td>${v.vendedor}</td>
                 <td>${v.pagamento}</td>
                 <td><strong>R$ ${v.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong></td>
-                <td class="no-print" id="acao-${v.id}"><button class="btn-delete" onclick="prepararExclusao(${v.id})">🗑️</button></td>
+                <td class="no-print" onclick="excluirDireto(${v.id})" style="cursor:pointer; color:var(--danger)">🗑️</td>
             </tr>`;
                 totais.Geral += v.valor;
                 totais[v.pagamento] += v.valor;
@@ -332,47 +343,31 @@
             document.getElementById('totalDebito').innerText = "R$ " + totais.Débito.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
         }
 
-        function prepararExclusao(id) {
-            document.getElementById(`acao-${id}`).innerHTML = `
-            <div class="confirm-box">
-                <button class="btn-confirm" onclick="confirmarExclusao(${id})">Sim</button>
-                <button class="btn-cancel" onclick="atualizarInterface()">Não</button>
-            </div>`;
+        function excluirDireto(id) {
+            if (confirm("Deseja excluir esta venda?")) {
+                vendas = vendas.filter(v => v.id !== id);
+                localStorage.setItem('bancoVendas', JSON.stringify(vendas));
+                atualizarInterface();
+            }
         }
 
-        function confirmarExclusao(id) {
-            vendas = vendas.filter(v => v.id !== id);
-            localStorage.setItem('bancoVendas', JSON.stringify(vendas));
-            atualizarInterface();
-        }
-
-        // Função para Gerar Imagem
         function gerarImagem() {
             const botoes = document.querySelectorAll('.no-print');
             botoes.forEach(b => b.style.display = 'none');
-            html2canvas(document.getElementById('area-foto'), { scale: 2 }).then(canvas => {
+            html2canvas(document.getElementById('area-foto'), { scale: 3 }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = `Relatorio_${inputFiltro.value}.png`;
+                link.download = `Vendas_${inputFiltro.value}.png`;
                 link.href = canvas.toDataURL();
                 link.click();
                 botoes.forEach(b => b.style.display = 'table-cell');
             });
         }
 
-        // Função para Gerar PDF (Corrigida)
         function gerarPDF() {
             const element = document.getElementById('area-foto');
             const botoes = document.querySelectorAll('.no-print');
             botoes.forEach(b => b.style.display = 'none');
-
-            const opt = {
-                margin: 10,
-                filename: `Relatorio_Vendas_${inputFiltro.value}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
+            const opt = { margin: 5, filename: `Vendas_${inputFiltro.value}.pdf`, html2canvas: { scale: 3 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
             html2pdf().set(opt).from(element).save().then(() => {
                 botoes.forEach(b => b.style.display = 'table-cell');
             });
