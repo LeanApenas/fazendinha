@@ -6,12 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema Beatriz & Milena</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root {
             --primary: #2f75b5;
             --success: #28a745;
             --danger: #dc3545;
             --accent: #6f42c1;
+            --pdf-color: #17a2b8;
             --bg: #f4f7f9;
         }
 
@@ -36,6 +38,13 @@
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
         }
 
         .dashboard-cards {
@@ -95,24 +104,17 @@
             border-bottom: 1px solid #eee;
         }
 
-        /* Botões de Excluir */
         .btn-delete {
             background: none;
             border: none;
             color: #ccc;
             cursor: pointer;
             font-size: 1.2em;
-            transition: 0.3s;
-        }
-
-        .btn-delete:hover {
-            color: var(--danger);
         }
 
         .confirm-box {
             display: flex;
             gap: 5px;
-            align-items: center;
         }
 
         .btn-confirm {
@@ -173,6 +175,11 @@
             border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.9;
         }
 
         .btn-add {
@@ -185,13 +192,14 @@
             color: white;
         }
 
+        .btn-pdf {
+            background: var(--pdf-color);
+            color: white;
+        }
+
         #area-foto {
             padding: 10px;
             border-radius: 10px;
-        }
-
-        .no-print {
-            display: inline-block;
         }
     </style>
 </head>
@@ -205,7 +213,10 @@
                 <label>Mês de Referência:</label>
                 <input type="month" id="filtroMes" onchange="atualizarInterface()">
             </div>
-            <button class="btn-img" onclick="gerarImagem()">📸 Gerar Foto do Relatório</button>
+            <div class="button-group">
+                <button class="btn-pdf" onclick="gerarPDF()">📄 Gerar PDF</button>
+                <button class="btn-img" onclick="gerarImagem()">📸 Gerar Foto</button>
+            </div>
         </div>
 
         <div id="area-foto">
@@ -280,20 +291,16 @@
         function adicionarVenda() {
             const prod = document.getElementById('produto').value;
             const val = parseFloat(document.getElementById('valor').value);
-            if (!prod || isNaN(val)) return alert("Preencha o produto e o valor!");
+            if (!prod || isNaN(val)) return alert("Preencha os dados!");
 
             const agora = new Date();
-            const novaVenda = {
-                id: Date.now(), // ID único para deletar com precisão
+            vendas.push({
+                id: Date.now(),
                 periodo: agora.toISOString().substring(0, 7),
                 dataHora: agora.toLocaleDateString('pt-BR') + ' ' + agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-                produto: prod,
-                valor: val,
-                vendedor: document.getElementById('vendedor').value,
-                pagamento: document.getElementById('pagamento').value
-            };
+                produto: prod, valor: val, vendedor: document.getElementById('vendedor').value, pagamento: document.getElementById('pagamento').value
+            });
 
-            vendas.push(novaVenda);
             localStorage.setItem('bancoVendas', JSON.stringify(vendas));
             document.getElementById('produto').value = '';
             document.getElementById('valor').value = '';
@@ -302,26 +309,19 @@
 
         function atualizarInterface() {
             const lista = document.getElementById('listaVendas');
-            const mesSelecionado = inputFiltro.value;
             lista.innerHTML = '';
             let totais = { Geral: 0, Dinheiro: 0, Crédito: 0, Débito: 0 };
-
-            const filtradas = vendas.filter(v => v.periodo === mesSelecionado);
+            const filtradas = vendas.filter(v => v.periodo === inputFiltro.value);
 
             filtradas.slice().reverse().forEach(v => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
+                lista.innerHTML += `<tr>
                 <td style="font-size: 0.85em; color: #777;">${v.dataHora}</td>
                 <td>${v.produto}</td>
                 <td>${v.vendedor}</td>
                 <td>${v.pagamento}</td>
                 <td><strong>R$ ${v.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong></td>
-                <td class="no-print" id="acao-${v.id}">
-                    <button class="btn-delete" onclick="prepararExclusao(${v.id})">🗑️</button>
-                </td>
-            `;
-                lista.appendChild(tr);
-
+                <td class="no-print" id="acao-${v.id}"><button class="btn-delete" onclick="prepararExclusao(${v.id})">🗑️</button></td>
+            </tr>`;
                 totais.Geral += v.valor;
                 totais[v.pagamento] += v.valor;
             });
@@ -332,15 +332,12 @@
             document.getElementById('totalDebito').innerText = "R$ " + totais.Débito.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
         }
 
-        // Função que mostra os botões de confirmação
         function prepararExclusao(id) {
-            const celula = document.getElementById(`acao-${id}`);
-            celula.innerHTML = `
+            document.getElementById(`acao-${id}`).innerHTML = `
             <div class="confirm-box">
                 <button class="btn-confirm" onclick="confirmarExclusao(${id})">Sim</button>
                 <button class="btn-cancel" onclick="atualizarInterface()">Não</button>
-            </div>
-        `;
+            </div>`;
         }
 
         function confirmarExclusao(id) {
@@ -349,23 +346,40 @@
             atualizarInterface();
         }
 
+        // Função para Gerar Imagem
         function gerarImagem() {
-            // Esconde botões de delete da imagem
             const botoes = document.querySelectorAll('.no-print');
-            botoes.forEach(b => b.style.opacity = '0');
-
+            botoes.forEach(b => b.style.display = 'none');
             html2canvas(document.getElementById('area-foto'), { scale: 2 }).then(canvas => {
                 const link = document.createElement('a');
                 link.download = `Relatorio_${inputFiltro.value}.png`;
                 link.href = canvas.toDataURL();
                 link.click();
-                botoes.forEach(b => b.style.opacity = '1');
+                botoes.forEach(b => b.style.display = 'table-cell');
+            });
+        }
+
+        // Função para Gerar PDF (Corrigida)
+        function gerarPDF() {
+            const element = document.getElementById('area-foto');
+            const botoes = document.querySelectorAll('.no-print');
+            botoes.forEach(b => b.style.display = 'none');
+
+            const opt = {
+                margin: 10,
+                filename: `Relatorio_Vendas_${inputFiltro.value}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                botoes.forEach(b => b.style.display = 'table-cell');
             });
         }
 
         atualizarInterface();
     </script>
-
 </body>
 
 </html>
