@@ -53,8 +53,12 @@
 
         .button-group button {
             flex: 1;
-            padding: 10px 5px;
+            padding: 12px 5px;
             font-size: 0.85em;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
         }
 
         .dashboard-cards {
@@ -70,6 +74,12 @@
             border-radius: 8px;
             text-align: center;
             border-top: 4px solid var(--primary);
+        }
+
+        .card h3 {
+            font-size: 0.9em;
+            margin: 0;
+            color: #666;
         }
 
         .card p {
@@ -98,6 +108,7 @@
             padding: 8px;
             border-bottom: 1px solid #eee;
             font-size: 0.8em;
+            text-align: left;
         }
 
         .input-section {
@@ -123,6 +134,12 @@
             min-width: 0;
         }
 
+        label {
+            font-size: 0.8em;
+            margin-bottom: 4px;
+            font-weight: bold;
+        }
+
         input,
         select {
             width: 100%;
@@ -130,6 +147,7 @@
             border: 1px solid #ccc;
             border-radius: 6px;
             font-size: 16px;
+            /* Evita zoom automático no iOS */
         }
 
         .btn-add {
@@ -146,6 +164,12 @@
         @media (min-width: 768px) {
             .header-actions {
                 flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+            }
+
+            .button-group {
+                width: auto;
             }
 
             .dashboard-cards {
@@ -164,16 +188,20 @@
 
     <div class="container">
         <div class="header-actions">
-            <div style="text-align:center"><label>Mês:</label><input type="month" id="filtroMes"
-                    onchange="atualizarInterface()"></div>
+            <div style="text-align:center">
+                <label>Mês:</label>
+                <input type="month" id="filtroMes" onchange="atualizarInterface()">
+            </div>
             <div class="button-group">
                 <button style="background:var(--pdf-color);color:white" onclick="gerarPDF()">📄 PDF</button>
                 <button style="background:var(--accent);color:white" onclick="gerarImagem()">📸 FOTO</button>
             </div>
         </div>
 
-        <div id="area-foto">
-            <h2 style="text-align: center; color: var(--primary); font-size: 1.1em;">Relatório Beatriz & Milena</h2>
+        <div id="area-foto" style="padding: 10px; background-color: var(--bg);">
+            <h2 style="text-align: center; color: var(--primary); font-size: 1.1em; margin-top: 0;">Relatório Beatriz &
+                Milena</h2>
+
             <div class="dashboard-cards">
                 <div class="card">
                     <h3>Total</h3>
@@ -192,6 +220,7 @@
                     <p id="totalDebito">R$ 0,00</p>
                 </div>
             </div>
+
             <div class="history-section">
                 <table>
                     <thead>
@@ -211,20 +240,27 @@
 
         <div class="input-section">
             <div class="input-row">
-                <div class="input-group"><label>Produto</label><input type="text" id="produto"></div>
+                <div class="input-group"><label>Produto</label><input type="text" id="produto"
+                        placeholder="Ex: Vestido"></div>
                 <div class="input-group" style="flex:0.4"><label>Valor</label><input type="number" id="valor"
-                        step="0.01"></div>
+                        step="0.01" placeholder="0,00"></div>
             </div>
             <div class="input-row">
-                <div class="input-group"><label>Vendedor</label><select id="vendedor">
+                <div class="input-group">
+                    <label>Vendedor</label>
+                    <select id="vendedor">
                         <option>Beatriz</option>
                         <option>Milena</option>
-                    </select></div>
-                <div class="input-group"><label>Pagamento</label><select id="pagamento">
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Pagamento</label>
+                    <select id="pagamento">
                         <option>Dinheiro</option>
                         <option>Crédito</option>
                         <option>Débito</option>
-                    </select></div>
+                    </select>
+                </div>
             </div>
             <button class="btn-add" id="btnSalvar" onclick="adicionarVenda()">Registrar Venda</button>
         </div>
@@ -242,24 +278,34 @@
         async function adicionarVenda() {
             const prod = document.getElementById('produto').value;
             const val = parseFloat(document.getElementById('valor').value);
-            if (!prod || isNaN(val)) return alert("Preencha tudo!");
+            if (!prod || isNaN(val)) return alert("Preencha o produto e o valor!");
 
-            document.getElementById('btnSalvar').disabled = true;
+            const btn = document.getElementById('btnSalvar');
+            btn.disabled = true;
+            btn.innerText = "Salvando...";
+
             const agora = new Date();
+            const dataFormatada = agora.toLocaleDateString('pt-BR').substring(0, 5) + ' ' +
+                agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
             const { error } = await _supabase.from('vendas').insert([{
                 periodo: agora.toISOString().substring(0, 7),
-                data_hora: agora.toLocaleDateString('pt-BR').substring(0, 5) + ' ' + agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-                produto: prod, valor: val, vendedor: document.getElementById('vendedor').value, pagamento: document.getElementById('pagamento').value
+                data_hora: dataFormatada,
+                produto: prod,
+                valor: val,
+                vendedor: document.getElementById('vendedor').value,
+                pagamento: document.getElementById('pagamento').value
             }]);
 
-            if (error) alert("Erro ao salvar: " + error.message);
-            else {
+            if (error) {
+                alert("Erro ao salvar: " + error.message);
+            } else {
                 document.getElementById('produto').value = '';
                 document.getElementById('valor').value = '';
-                atualizarInterface();
+                await atualizarInterface();
             }
-            document.getElementById('btnSalvar').disabled = false;
+            btn.disabled = false;
+            btn.innerText = "Registrar Venda";
         }
 
         async function atualizarInterface() {
@@ -268,7 +314,7 @@
                 .eq('periodo', inputFiltro.value)
                 .order('id', { ascending: false });
 
-            if (error) return;
+            if (error) return console.error(error);
 
             const lista = document.getElementById('listaVendas');
             lista.innerHTML = '';
@@ -276,12 +322,15 @@
 
             vendas.forEach(v => {
                 lista.innerHTML += `<tr>
-                <td>${v.data_hora}</td><td>${v.produto}</td><td>${v.vendedor}</td><td>${v.pagamento}</td>
-                <td><strong>R$ ${v.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong></td>
-                <td class="no-print" onclick="excluirVenda(${v.id})" style="color:var(--danger);cursor:pointer">🗑️</td>
-            </tr>`;
+                    <td>${v.data_hora}</td>
+                    <td>${v.produto}</td>
+                    <td>${v.vendedor}</td>
+                    <td>${v.pagamento}</td>
+                    <td><strong>R$ ${v.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong></td>
+                    <td class="no-print" onclick="excluirVenda(${v.id})" style="color:var(--danger);cursor:pointer;text-align:center">🗑️</td>
+                </tr>`;
                 totais.Geral += v.valor;
-                totais[v.pagamento] += v.valor;
+                if (totais[v.pagamento] !== undefined) totais[v.pagamento] += v.valor;
             });
 
             document.getElementById('totalGeral').innerText = "R$ " + totais.Geral.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
@@ -291,60 +340,61 @@
         }
 
         async function excluirVenda(id) {
-            if (confirm("Excluir?")) {
+            if (confirm("Deseja realmente excluir esta venda?")) {
                 await _supabase.from('vendas').delete().eq('id', id);
                 atualizarInterface();
             }
         }
 
-        function gerarImagem() {
-            async function gerarImagem() {
-                const area = document.getElementById('area-foto');
-                // Oculta elementos que não devem sair na foto (como o ícone de lixeira)
-                const elementosOcultos = document.querySelectorAll('.no-print');
-                elementosOcultos.forEach(el => el.style.display = 'none');
+        // --- EXPORTAÇÃO ---
 
-                try {
-                    const canvas = await html2canvas(area, {
-                        scale: 2, // Melhora a qualidade no celular
-                        useCORS: true,
-                        backgroundColor: "#f4f7f9"
-                    });
+        async function gerarImagem() {
+            const area = document.getElementById('area-foto');
+            const noPrint = document.querySelectorAll('.no-print');
 
-                    const link = document.createElement('a');
-                    link.download = `relatorio-${inputFiltro.value}.png`;
-                    link.href = canvas.toDataURL("image/png");
-                    link.click();
-                } catch (err) {
-                    alert("Erro ao gerar imagem: " + err);
-                } finally {
-                    elementosOcultos.forEach(el => el.style.display = '');
-                }
-            }
+            noPrint.forEach(el => el.style.display = 'none');
 
-            function gerarPDF() {
-                const area = document.getElementById('area-foto');
-                const opt = {
-                    margin: 10,
-                    filename: `relatorio-${inputFiltro.value}.pdf`,
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2, useCORS: true },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                };
-
-                // Oculta a lixeira antes de gerar
-                const elementosOcultos = document.querySelectorAll('.no-print');
-                elementosOcultos.forEach(el => el.style.display = 'none');
-
-                html2pdf().set(opt).from(area).save().then(() => {
-                    elementosOcultos.forEach(el => el.style.display = '');
+            try {
+                const canvas = await html2canvas(area, {
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: "#f4f7f9"
                 });
+                const link = document.createElement('a');
+                link.download = `relatorio-${inputFiltro.value}.png`;
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+            } catch (err) {
+                alert("Erro ao gerar imagem: " + err);
+            } finally {
+                noPrint.forEach(el => el.style.display = '');
             }
         }
 
+        function gerarPDF() {
+            const area = document.getElementById('area-foto');
+            const noPrint = document.querySelectorAll('.no-print');
 
+            noPrint.forEach(el => el.style.display = 'none');
+
+            const opt = {
+                margin: 5,
+                filename: `relatorio-${inputFiltro.value}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(area).save().then(() => {
+                noPrint.forEach(el => el.style.display = '');
+            }).catch(err => {
+                alert("Erro ao gerar PDF: " + err);
+                noPrint.forEach(el => el.style.display = '');
+            });
+        }
+
+        // Inicialização
         atualizarInterface();
-        // Atualiza automaticamente a cada 30 segundos para ver vendas de outro celular
         setInterval(atualizarInterface, 30000); 
     </script>
 </body>
