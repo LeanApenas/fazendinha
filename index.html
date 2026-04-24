@@ -297,8 +297,51 @@
             }
         }
 
-        function gerarImagem() { /* ... código anterior ... */ }
-        function gerarPDF() { /* ... código anterior ... */ }
+        function gerarImagem() {
+            async function gerarImagem() {
+                const area = document.getElementById('area-foto');
+                // Oculta elementos que não devem sair na foto (como o ícone de lixeira)
+                const elementosOcultos = document.querySelectorAll('.no-print');
+                elementosOcultos.forEach(el => el.style.display = 'none');
+
+                try {
+                    const canvas = await html2canvas(area, {
+                        scale: 2, // Melhora a qualidade no celular
+                        useCORS: true,
+                        backgroundColor: "#f4f7f9"
+                    });
+
+                    const link = document.createElement('a');
+                    link.download = `relatorio-${inputFiltro.value}.png`;
+                    link.href = canvas.toDataURL("image/png");
+                    link.click();
+                } catch (err) {
+                    alert("Erro ao gerar imagem: " + err);
+                } finally {
+                    elementosOcultos.forEach(el => el.style.display = '');
+                }
+            }
+
+            function gerarPDF() {
+                const area = document.getElementById('area-foto');
+                const opt = {
+                    margin: 10,
+                    filename: `relatorio-${inputFiltro.value}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+
+                // Oculta a lixeira antes de gerar
+                const elementosOcultos = document.querySelectorAll('.no-print');
+                elementosOcultos.forEach(el => el.style.display = 'none');
+
+                html2pdf().set(opt).from(area).save().then(() => {
+                    elementosOcultos.forEach(el => el.style.display = '');
+                });
+            }
+        }
+
 
         atualizarInterface();
         // Atualiza automaticamente a cada 30 segundos para ver vendas de outro celular
