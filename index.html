@@ -1,380 +1,87 @@
-<!DOCTYPE html>
-<html lang="pt-br">
+<style>
+    /* ... (mantenha o restante do seu CSS) ... */
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sistema Beatriz & Milena</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <style>
-        :root {
-            --primary: #2f75b5;
-            --success: #28a745;
-            --danger: #dc3545;
-            --accent: #6f42c1;
-            --pdf-color: #17a2b8;
-            --bg: #f4f7f9;
-        }
+    /* SEÇÃO DE ENTRADA CORRIGIDA */
+    .input-section {
+        background: #fff;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        /* No celular, um embaixo do outro */
+        gap: 15px;
+        border: 1px solid #ddd;
+    }
 
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background-color: var(--bg);
-            margin: 10px;
-            color: #333;
-        }
+    .input-row {
+        display: flex;
+        gap: 10px;
+        width: 100%;
+    }
 
-        .container {
-            max-width: 1100px;
-            margin: auto;
-        }
+    .input-group {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-width: 0;
+        /* Impede que o input force a largura para fora */
+    }
 
-        /* Ajuste do topo para Celular */
-        .header-actions {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-            flex-wrap: wrap;
-            gap: 10px;
-        }
+    input,
+    select {
+        width: 100%;
+        box-sizing: border-box;
+        /* Garante que o padding não aumente o tamanho total */
+        padding: 12px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 16px;
+    }
 
-        .button-group {
-            display: flex;
-            gap: 8px;
-            width: 100%;
-            justify-content: center;
-        }
-
-        .button-group button {
-            flex: 1;
-            padding: 10px 5px;
-            font-size: 0.9em;
-        }
-
-        /* Dashboard Cards Responsivos */
-        .dashboard-cards {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            /* 2 colunas no celular */
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .card {
-            background: white;
-            padding: 15px 10px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            border-top: 4px solid var(--primary);
-        }
-
-        .card h3 {
-            margin: 0;
-            font-size: 0.7em;
-            color: #666;
-            text-transform: uppercase;
-        }
-
-        .card p {
-            margin: 5px 0 0;
-            font-size: 1.2em;
-            font-weight: bold;
-            color: var(--primary);
-        }
-
-        /* Tabela Responsiva */
-        .history-section {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-            overflow-x: auto;
-            /* Permite rolar pro lado se a tabela for grande */
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 400px;
-        }
-
-        th {
-            background: #f8f9fa;
-            color: #555;
-            text-align: left;
-            padding: 10px;
-            font-size: 0.8em;
-            border-bottom: 2px solid #eee;
-        }
-
-        td {
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-            font-size: 0.85em;
-        }
-
-        /* Formulário de Lançamento Responsivo */
+    /* AJUSTE PARA PC */
+    @media (min-width: 768px) {
         .input-section {
-            background: #fff;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            border: 1px solid #ddd;
+            flex-direction: row;
+            /* No PC, volta a ser lado a lado */
+            align-items: flex-end;
         }
 
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
+        .input-row {
+            width: auto;
+            flex: 2;
         }
+    }
+</style>
 
-        label {
-            font-size: 0.8em;
-            font-weight: bold;
-            margin-bottom: 4px;
-        }
-
-        input,
-        select {
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 16px;
-            /* Evita zoom no iPhone */
-        }
-
-        button {
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.2s;
-        }
-
-        .btn-add {
-            background: var(--success);
-            color: white;
-            padding: 15px;
-            width: 100%;
-            font-size: 1.1em;
-        }
-
-        .btn-img {
-            background: var(--accent);
-            color: white;
-        }
-
-        .btn-pdf {
-            background: var(--pdf-color);
-            color: white;
-        }
-
-        /* Estilos para o PC (Telas maiores que 768px) */
-        @media (min-width: 768px) {
-            .dashboard-cards {
-                grid-template-columns: repeat(4, 1fr);
-            }
-
-            .input-section {
-                flex-direction: row;
-                align-items: flex-end;
-            }
-
-            .button-group {
-                width: auto;
-            }
-
-            .btn-add {
-                width: auto;
-                padding: 12px 20px;
-            }
-
-            body {
-                margin: 20px;
-            }
-        }
-
-        #area-foto {
-            padding: 5px;
-            border-radius: 10px;
-        }
-    </style>
-</head>
-
-<body>
-
-    <div class="container">
-
-        <div class="header-actions">
-            <div style="width: 100%; text-align: center; margin-bottom: 5px;">
-                <label>Mês:</label>
-                <input type="month" id="filtroMes" onchange="atualizarInterface()">
-            </div>
-            <div class="button-group">
-                <button class="btn-pdf" onclick="gerarPDF()">📄 PDF</button>
-                <button class="btn-img" onclick="gerarImagem()">📸 Foto</button>
-            </div>
+<div class="input-section">
+    <div class="input-row">
+        <div class="input-group">
+            <label>Produto</label>
+            <input type="text" id="produto" placeholder="Nome">
         </div>
-
-        <div id="area-foto">
-            <h2 style="text-align: center; color: var(--primary); font-size: 1.2em; margin-bottom: 15px;">Relatório
-                Beatriz & Milena</h2>
-
-            <div class="dashboard-cards">
-                <div class="card">
-                    <h3>Total</h3>
-                    <p id="totalGeral">R$ 0,00</p>
-                </div>
-                <div class="card">
-                    <h3>Dinheiro</h3>
-                    <p id="totalDinheiro">R$ 0,00</p>
-                </div>
-                <div class="card">
-                    <h3>Crédito</h3>
-                    <p id="totalCredito">R$ 0,00</p>
-                </div>
-                <div class="card">
-                    <h3>Débito</h3>
-                    <p id="totalDebito">R$ 0,00</p>
-                </div>
-            </div>
-
-            <div class="history-section">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Data</th>
-                            <th>Prod.</th>
-                            <th>Vend.</th>
-                            <th>Pgto.</th>
-                            <th>Valor</th>
-                            <th class="no-print"></th>
-                        </tr>
-                    </thead>
-                    <tbody id="listaVendas"></tbody>
-                </table>
-            </div>
+        <div class="input-group" style="flex: 0.4;"> <label>Valor</label>
+            <input type="number" id="valor" step="0.01" placeholder="0,00">
         </div>
-
-        <div class="input-section">
-            <div style="display: flex; gap: 10px;">
-                <div class="input-group"><label>Produto</label><input type="text" id="produto" placeholder="Nome"></div>
-                <div class="input-group" style="flex: 0.5;"><label>Valor</label><input type="number" id="valor"
-                        step="0.01" placeholder="0,00"></div>
-            </div>
-            <div style="display: flex; gap: 10px;">
-                <div class="input-group">
-                    <label>Vendedor</label>
-                    <select id="vendedor">
-                        <option value="Beatriz">Beatriz</option>
-                        <option value="Milena">Milena</option>
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label>Pagamento</label>
-                    <select id="pagamento">
-                        <option value="Dinheiro">Dinheiro</option>
-                        <option value="Crédito">Crédito</option>
-                        <option value="Débito">Débito</option>
-                    </select>
-                </div>
-            </div>
-            <button class="btn-add" onclick="adicionarVenda()">Registrar Venda</button>
-        </div>
-
     </div>
 
-    <script>
-        let vendas = JSON.parse(localStorage.getItem('bancoVendas')) || [];
-        const inputFiltro = document.getElementById('filtroMes');
-        inputFiltro.value = new Date().toISOString().substring(0, 7);
+    <div class="input-row">
+        <div class="input-group">
+            <label>Vendedor</label>
+            <select id="vendedor">
+                <option value="Beatriz">Beatriz</option>
+                <option value="Milena">Milena</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label>Pagamento</label>
+            <select id="pagamento">
+                <option value="Dinheiro">Dinheiro</option>
+                <option value="Crédito">Crédito</option>
+                <option value="Débito">Débito</option>
+            </select>
+        </div>
+    </div>
 
-        function adicionarVenda() {
-            const prod = document.getElementById('produto').value;
-            const val = parseFloat(document.getElementById('valor').value);
-            if (!prod || isNaN(val)) return alert("Preencha os dados!");
-
-            const agora = new Date();
-            vendas.push({
-                id: Date.now(),
-                periodo: agora.toISOString().substring(0, 7),
-                dataHora: agora.toLocaleDateString('pt-BR').substring(0, 5) + ' ' + agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-                produto: prod, valor: val, vendedor: document.getElementById('vendedor').value, pagamento: document.getElementById('pagamento').value
-            });
-
-            localStorage.setItem('bancoVendas', JSON.stringify(vendas));
-            document.getElementById('produto').value = '';
-            document.getElementById('valor').value = '';
-            atualizarInterface();
-        }
-
-        function atualizarInterface() {
-            const lista = document.getElementById('listaVendas');
-            lista.innerHTML = '';
-            let totais = { Geral: 0, Dinheiro: 0, Crédito: 0, Débito: 0 };
-            const filtradas = vendas.filter(v => v.periodo === inputFiltro.value);
-
-            filtradas.slice().reverse().forEach(v => {
-                lista.innerHTML += `<tr>
-                <td style="color: #777;">${v.dataHora}</td>
-                <td>${v.produto}</td>
-                <td>${v.vendedor}</td>
-                <td>${v.pagamento}</td>
-                <td><strong>R$ ${v.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong></td>
-                <td class="no-print" onclick="excluirDireto(${v.id})" style="cursor:pointer; color:var(--danger)">🗑️</td>
-            </tr>`;
-                totais.Geral += v.valor;
-                totais[v.pagamento] += v.valor;
-            });
-
-            document.getElementById('totalGeral').innerText = "R$ " + totais.Geral.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-            document.getElementById('totalDinheiro').innerText = "R$ " + totais.Dinheiro.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-            document.getElementById('totalCredito').innerText = "R$ " + totais.Crédito.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-            document.getElementById('totalDebito').innerText = "R$ " + totais.Débito.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-        }
-
-        function excluirDireto(id) {
-            if (confirm("Deseja excluir esta venda?")) {
-                vendas = vendas.filter(v => v.id !== id);
-                localStorage.setItem('bancoVendas', JSON.stringify(vendas));
-                atualizarInterface();
-            }
-        }
-
-        function gerarImagem() {
-            const botoes = document.querySelectorAll('.no-print');
-            botoes.forEach(b => b.style.display = 'none');
-            html2canvas(document.getElementById('area-foto'), { scale: 3 }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = `Vendas_${inputFiltro.value}.png`;
-                link.href = canvas.toDataURL();
-                link.click();
-                botoes.forEach(b => b.style.display = 'table-cell');
-            });
-        }
-
-        function gerarPDF() {
-            const element = document.getElementById('area-foto');
-            const botoes = document.querySelectorAll('.no-print');
-            botoes.forEach(b => b.style.display = 'none');
-            const opt = { margin: 5, filename: `Vendas_${inputFiltro.value}.pdf`, html2canvas: { scale: 3 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
-            html2pdf().set(opt).from(element).save().then(() => {
-                botoes.forEach(b => b.style.display = 'table-cell');
-            });
-        }
-
-        atualizarInterface();
-    </script>
-</body>
-
-</html>
+    <button class="btn-add" onclick="adicionarVenda()">Registrar Venda</button>
+</div>
