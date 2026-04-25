@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema Beatriz & Milena</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -11,327 +11,356 @@
     <style>
         :root {
             --primary: #2f75b5;
-            --success: #28a745;
-            --danger: #dc3545;
-            --accent: #6f42c1;
-            --pix: #17a2b8;
             --bg: #f4f7f9;
         }
 
-        * {
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             background-color: var(--bg);
             margin: 10px;
-            color: #333;
         }
 
-        .container {
+        /* Cabeçalho superior conforme Foto 1 */
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            max-width: 1100px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .filtro-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            padding: 5px 15px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
+        .filtro-container label {
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        input[type="month"] {
+            border: none;
+            font-size: 1em;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 15px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-pdf {
+            background-color: #17a2b8;
+        }
+
+        .btn-foto {
+            background-color: #6f42c1;
+        }
+
+        /* Área do Relatório */
+        #area-relatorio {
             max-width: 1100px;
             margin: auto;
-        }
-
-        /* Cabeçalho com Calendário */
-        .header-actions {
             background: white;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
+            padding: 20px;
+            border-radius: 12px;
+            position: relative;
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 25px;
+        }
+
+        /* Layout de 4 Cartões + PIX na lateral conforme Foto 1 */
+        .dashboard-container {
             display: flex;
-            flex-direction: column;
-            gap: 10px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            gap: 20px;
+            align-items: flex-start;
+            margin-bottom: 30px;
         }
 
-        .button-group {
-            display: flex;
-            gap: 8px;
-            width: 100%;
-        }
-
-        .button-group button {
-            flex: 1;
-            padding: 12px 5px;
-            font-size: 0.85em;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            color: white;
-        }
-
-        /* Cartões de Resumo */
-        .dashboard-cards {
+        .cards-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            flex: 1;
         }
 
         .card {
             background: white;
-            padding: 12px 5px;
+            padding: 15px 5px;
             border-radius: 8px;
             text-align: center;
-            border-top: 4px solid var(--primary);
+            border: 1.5px solid var(--primary);
         }
 
         .card h3 {
             font-size: 0.85em;
             margin: 0;
-            color: #666;
+            color: #333;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+            margin-bottom: 8px;
         }
 
         .card p {
-            margin: 5px 0 0;
+            margin: 0;
             font-size: 1.1em;
             font-weight: bold;
             color: var(--primary);
         }
 
-        /* Tabela de Vendas */
+        /* O "Quadrado do PIX" desenhado na lateral da Foto 1 */
+        .pix-box {
+            width: 140px;
+            border: 1px solid #000;
+            padding: 15px 5px;
+            text-align: center;
+            align-self: stretch;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .pix-box span {
+            display: block;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: var(--primary);
+            margin-top: 5px;
+        }
+
+        /* Tabela */
         .history-section {
-            background: white;
-            padding: 10px;
-            border-radius: 8px;
             overflow-x: auto;
-            margin-bottom: 20px;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 450px;
         }
 
-        td,
         th {
-            padding: 10px 8px;
+            text-align: left;
+            padding: 10px;
+            font-size: 0.85em;
+            color: #333;
+            border-bottom: 2px solid #eee;
+        }
+
+        td {
+            padding: 10px;
             border-bottom: 1px solid #eee;
             font-size: 0.85em;
-            text-align: left;
         }
 
-        /* Formulário de Input */
-        .input-section {
-            background: #fff;
+        .btn-del {
+            cursor: pointer;
+            filter: grayscale(1);
+            opacity: 0.5;
+        }
+
+        /* Área de Cadastro */
+        .input-area {
+            max-width: 1100px;
+            margin: 20px auto;
+            background: white;
             padding: 15px;
-            border-radius: 8px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
+            border-radius: 12px;
             border: 1px solid #ddd;
         }
 
         .input-row {
             display: flex;
             gap: 10px;
-            width: 100%;
+            margin-bottom: 10px;
         }
 
         .input-group {
+            flex: 1;
             display: flex;
             flex-direction: column;
-            flex: 1;
-            min-width: 0;
-        }
-
-        label {
-            font-size: 0.8em;
-            margin-bottom: 4px;
-            font-weight: bold;
         }
 
         input,
         select {
-            width: 100%;
-            padding: 12px;
+            padding: 10px;
             border: 1px solid #ccc;
             border-radius: 6px;
-            font-size: 16px;
         }
 
-        .btn-add {
-            background: var(--success);
+        .btn-salvar {
+            background: #28a745;
             color: white;
-            padding: 15px;
+            padding: 12px;
             width: 100%;
             border: none;
             border-radius: 6px;
-            cursor: pointer;
             font-weight: bold;
+            cursor: pointer;
             font-size: 1em;
-        }
-
-        @media (min-width: 768px) {
-            .header-actions {
-                flex-direction: row;
-                align-items: center;
-                justify-content: space-between;
-            }
-
-            .button-group {
-                width: auto;
-            }
-
-            .dashboard-cards {
-                grid-template-columns: repeat(5, 1fr);
-            }
-
-            .input-section {
-                flex-direction: row;
-                align-items: flex-end;
-            }
         }
     </style>
 </head>
 
 <body>
 
-    <div class="container">
-        <div class="header-actions">
-            <div style="flex: 1;">
-                <label>Selecionar Dia/Mês/Ano:</label>
-                <input type="date" id="filtroData" onchange="atualizarInterface()">
-            </div>
-            <div class="button-group">
-                <button style="background:var(--pix);" onclick="gerarPDF()">📄 PDF</button>
-                <button style="background:var(--accent);" onclick="gerarImagem()">📸 FOTO</button>
-            </div>
+    <div class="header-top">
+        <div class="filtro-container">
+            <label>Mês:</label>
+            <input type="month" id="filtroMes" onchange="atualizarInterface()">
         </div>
+        <div class="btn-group">
+            <button class="btn btn-pdf" onclick="gerarPDF()">📄 PDF</button>
+            <button class="btn btn-foto" onclick="gerarImagem()">📸 FOTO</button>
+        </div>
+    </div>
 
-        <div id="area-foto" style="padding: 10px; background-color: var(--bg);">
-            <h2
-                style="text-align: center; color: var(--primary); font-size: 1.2em; margin-top: 0; margin-bottom: 15px;">
-                Relatório Beatriz & Milena
-            </h2>
+    <div id="area-relatorio">
+        <h2>Relatório Beatriz & Milena</h2>
 
-            <div class="dashboard-cards">
-                <div class="card" style="border-top-color: var(--primary)">
+        <div class="dashboard-container">
+            <div class="cards-grid">
+                <div class="card">
                     <h3>Total</h3>
                     <p id="totalGeral">R$ 0,00</p>
                 </div>
-                <div class="card" style="border-top-color: var(--success)">
+                <div class="card">
                     <h3>Dinheiro</h3>
                     <p id="totalDinheiro">R$ 0,00</p>
                 </div>
-                <div class="card" style="border-top-color: var(--pix)">
-                    <h3>PIX</h3>
-                    <p id="totalPix">R$ 0,00</p>
-                </div>
-                <div class="card" style="border-top-color: #ffc107">
+                <div class="card">
                     <h3>Crédito</h3>
                     <p id="totalCredito">R$ 0,00</p>
                 </div>
-                <div class="card" style="border-top-color: #fd7e14">
+                <div class="card">
                     <h3>Débito</h3>
                     <p id="totalDebito">R$ 0,00</p>
                 </div>
             </div>
 
-            <div class="history-section">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Hora/Data</th>
-                            <th>Prod.</th>
-                            <th>Vend.</th>
-                            <th>Pgto.</th>
-                            <th>Valor</th>
-                            <th class="no-print"></th>
-                        </tr>
-                    </thead>
-                    <tbody id="listaVendas"></tbody>
-                </table>
+            <div class="pix-box">
+                <strong>PIX</strong>
+                <span id="totalPix">R$ 0,00</span>
             </div>
         </div>
 
-        <div class="input-section">
-            <div class="input-row">
-                <div class="input-group"><label>Produto</label><input type="text" id="produto"
-                        placeholder="Ex: Vestido"></div>
-                <div class="input-group" style="flex:0.4"><label>Valor</label><input type="number" id="valor"
-                        step="0.01" placeholder="0,00"></div>
-            </div>
-            <div class="input-row">
-                <div class="input-group">
-                    <label>Vendedor</label>
-                    <select id="vendedor">
-                        <option>Beatriz</option>
-                        <option>Milena</option>
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label>Pagamento</label>
-                    <select id="pagamento">
-                        <option>Dinheiro</option>
-                        <option>PIX</option>
-                        <option>Crédito</option>
-                        <option>Débito</option>
-                    </select>
-                </div>
-            </div>
-            <button class="btn-add" id="btnSalvar" onclick="adicionarVenda()">Registrar Venda</button>
+        <div class="history-section">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Prod.</th>
+                        <th>Vend.</th>
+                        <th>Pgto.</th>
+                        <th>Valor</th>
+                        <th class="no-print"></th>
+                    </tr>
+                </thead>
+                <tbody id="listaVendas"></tbody>
+            </table>
         </div>
     </div>
 
+    <div class="input-area">
+        <div class="input-row">
+            <div class="input-group"><label>Produto</label><input type="text" id="produto" placeholder="Ex: Vestido">
+            </div>
+            <div class="input-group" style="flex:0.3"><label>Valor</label><input type="number" id="valor" step="0.01"
+                    placeholder="0,00"></div>
+        </div>
+        <div class="input-row">
+            <div class="input-group">
+                <label>Vendedor</label>
+                <select id="vendedor">
+                    <option>Beatriz</option>
+                    <option>Milena</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Pagamento</label>
+                <select id="pagamento">
+                    <option>Dinheiro</option>
+                    <option>PIX</option>
+                    <option>Crédito</option>
+                    <option>Débito</option>
+                </select>
+            </div>
+        </div>
+        <button class="btn-salvar" id="btnSalvar" onclick="adicionarVenda()">Registrar Venda</button>
+    </div>
+
     <script>
-        // CONFIGURAÇÃO SUPABASE
         const SUPABASE_URL = 'https://wqlegyymfygzfvclglng.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_RuAKM7NKPwoFWFK-CsvQwQ_wzpmjapZ';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Inicia com a data de HOJE no calendário
-        const inputFiltro = document.getElementById('filtroData');
-        inputFiltro.value = new Date().toISOString().split('T')[0];
+        const inputFiltro = document.getElementById('filtroMes');
+        inputFiltro.value = new Date().toISOString().substring(0, 7);
 
         async function adicionarVenda() {
             const prod = document.getElementById('produto').value;
             const val = parseFloat(document.getElementById('valor').value);
-            if (!prod || isNaN(val)) return alert("Preencha o produto e o valor!");
+            if (!prod || isNaN(val)) return alert("Preencha produto e valor!");
 
             const btn = document.getElementById('btnSalvar');
             btn.disabled = true;
             btn.innerText = "Salvando...";
 
             const agora = new Date();
-            const dataCompleta = agora.toISOString().split('T')[0]; // YYYY-MM-DD
-            const horaFormatada = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            const dataHora = agora.toLocaleDateString('pt-BR').substring(0, 5) + ' ' +
+                agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
             const { error } = await _supabase.from('vendas').insert([{
-                periodo: dataCompleta,
-                data_hora: horaFormatada,
+                periodo: agora.toISOString().substring(0, 7), // Salva 2026-04
+                data_hora: dataHora,
                 produto: prod,
                 valor: val,
                 vendedor: document.getElementById('vendedor').value,
                 pagamento: document.getElementById('pagamento').value
             }]);
 
-            if (error) {
-                alert("Erro ao salvar: " + error.message);
-            } else {
+            if (error) alert("Erro: " + error.message);
+            else {
                 document.getElementById('produto').value = '';
                 document.getElementById('valor').value = '';
-                await atualizarInterface();
+                atualizarInterface();
             }
             btn.disabled = false;
             btn.innerText = "Registrar Venda";
         }
 
         async function atualizarInterface() {
-            const dataFiltro = inputFiltro.value;
-
-            // Buscamos as vendas. Usamos LIKE para pegar tanto os registros de dia 
-            // quanto os registros antigos que só tinham mês (se coincidir o início)
+            const mes = inputFiltro.value;
             const { data: vendas, error } = await _supabase.from('vendas')
                 .select('*')
-                .like('periodo', `${dataFiltro}%`)
+                .like('periodo', `${mes}%`)
                 .order('id', { ascending: false });
 
-            if (error) return console.error(error);
+            if (error) return;
 
             const lista = document.getElementById('listaVendas');
             lista.innerHTML = '';
@@ -343,22 +372,19 @@
                     <td>${v.produto}</td>
                     <td>${v.vendedor}</td>
                     <td>${v.pagamento}</td>
-                    <td><strong>R$ ${v.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong></td>
-                    <td class="no-print" onclick="excluirVenda(${v.id})" style="color:var(--danger);cursor:pointer;text-align:center">🗑️</td>
+                    <td><strong>R$ ${parseFloat(v.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong></td>
+                    <td class="no-print btn-del" onclick="excluir(${v.id})">🗑️</td>
                 </tr>`;
 
-                const valorNum = parseFloat(v.valor);
-                totais.Geral += valorNum;
-
-                // Normalização do texto para soma correta (PIX, pix, Pix, etc)
-                const pgto = v.pagamento.trim().toLowerCase();
-                if (pgto === "dinheiro") totais.Dinheiro += valorNum;
-                else if (pgto === "pix") totais.PIX += valorNum;
-                else if (pgto === "crédito" || pgto === "credito") totais.Crédito += valorNum;
-                else if (pgto === "débito" || pgto === "debito") totais.Débito += valorNum;
+                const val = parseFloat(v.valor);
+                totais.Geral += val;
+                const p = v.pagamento.trim().toLowerCase();
+                if (p === "dinheiro") totais.Dinheiro += val;
+                else if (p === "pix") totais.PIX += val;
+                else if (p.includes("crédito") || p.includes("credito")) totais.Crédito += val;
+                else if (p.includes("débito") || p.includes("debito")) totais.Débito += val;
             });
 
-            // Atualiza os cartões
             document.getElementById('totalGeral').innerText = "R$ " + totais.Geral.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
             document.getElementById('totalDinheiro').innerText = "R$ " + totais.Dinheiro.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
             document.getElementById('totalPix').innerText = "R$ " + totais.PIX.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
@@ -366,46 +392,34 @@
             document.getElementById('totalDebito').innerText = "R$ " + totais.Débito.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
         }
 
-        async function excluirVenda(id) {
-            if (confirm("Deseja realmente excluir esta venda?")) {
+        async function excluir(id) {
+            if (confirm("Excluir venda?")) {
                 await _supabase.from('vendas').delete().eq('id', id);
                 atualizarInterface();
             }
         }
 
-        // Funções de exportação
         async function gerarImagem() {
-            const area = document.getElementById('area-foto');
+            const area = document.getElementById('area-relatorio');
             const noPrint = document.querySelectorAll('.no-print');
             noPrint.forEach(el => el.style.display = 'none');
-            try {
-                const canvas = await html2canvas(area, { scale: 2, useCORS: true, backgroundColor: "#f4f7f9" });
-                const link = document.createElement('a');
-                link.download = `relatorio-${inputFiltro.value}.png`;
-                link.href = canvas.toDataURL("image/png");
-                link.click();
-            } finally {
-                noPrint.forEach(el => el.style.display = '');
-            }
+            const canvas = await html2canvas(area, { scale: 2 });
+            const link = document.createElement('a');
+            link.download = `relatorio-${inputFiltro.value}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+            noPrint.forEach(el => el.style.display = '');
         }
 
         function gerarPDF() {
-            const area = document.getElementById('area-foto');
+            const area = document.getElementById('area-relatorio');
             const noPrint = document.querySelectorAll('.no-print');
             noPrint.forEach(el => el.style.display = 'none');
-            const opt = {
-                margin: 5,
-                filename: `relatorio-${inputFiltro.value}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-            html2pdf().set(opt).from(area).save().then(() => {
+            html2pdf().from(area).set({ margin: 10, filename: `relatorio-${inputFiltro.value}.pdf` }).save().then(() => {
                 noPrint.forEach(el => el.style.display = '');
             });
         }
 
-        // Carregamento inicial
         atualizarInterface();
     </script>
 </body>
