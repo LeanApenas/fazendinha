@@ -314,9 +314,12 @@
         }
 
         async function atualizarInterface() {
+            const mesSelecionado = inputFiltro.value; // Ex: "2026-04"
+
+            // Buscamos todas as vendas que COMEÇAM com o mês selecionado
             const { data: vendas, error } = await _supabase.from('vendas')
                 .select('*')
-                .eq('periodo', inputFiltro.value)
+                .like('periodo', `${mesSelecionado}%`)
                 .order('id', { ascending: false });
 
             if (error) return console.error(error);
@@ -327,23 +330,23 @@
 
             vendas.forEach(v => {
                 lista.innerHTML += `<tr>
-                    <td>${v.data_hora}</td>
-                    <td>${v.produto}</td>
-                    <td>${v.vendedor}</td>
-                    <td>${v.pagamento}</td>
-                    <td><strong>R$ ${v.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong></td>
-                    <td class="no-print" onclick="excluirVenda(${v.id})" style="color:var(--danger);cursor:pointer;text-align:center">🗑️</td>
-                </tr>`;
+            <td>${v.data_hora}</td>
+            <td>${v.produto}</td>
+            <td>${v.vendedor}</td>
+            <td>${v.pagamento}</td>
+            <td><strong>R$ ${v.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong></td>
+            <td class="no-print" onclick="excluirVenda(${v.id})" style="color:var(--danger);cursor:pointer;text-align:center">🗑️</td>
+        </tr>`;
 
                 totais.Geral += v.valor;
 
-                // Normalização para evitar problemas com acentos (Crédito vs Credito)
-                let p = v.pagamento;
-                if (totais[p] !== undefined) {
-                    totais[p] += v.valor;
+                // Soma o pagamento se ele existir no nosso objeto de totais
+                if (totais[v.pagamento] !== undefined) {
+                    totais[v.pagamento] += v.valor;
                 }
             });
 
+            // Atualiza os cartões na tela
             document.getElementById('totalGeral').innerText = "R$ " + totais.Geral.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
             document.getElementById('totalDinheiro').innerText = "R$ " + totais.Dinheiro.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
             document.getElementById('totalPix').innerText = "R$ " + totais.PIX.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
