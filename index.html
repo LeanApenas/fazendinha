@@ -14,7 +14,7 @@
             --success: #28a745;
             --danger: #dc3545;
             --accent: #6f42c1;
-            --pix: #32bcad;
+            --pix: #17a2b8;
             --pdf-color: #17a2b8;
             --bg: #f4f7f9;
         }
@@ -37,12 +37,12 @@
 
         .header-actions {
             background: white;
-            padding: 15px;
+            padding: 10px;
             border-radius: 8px;
             margin-bottom: 15px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 10px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
         }
 
@@ -78,7 +78,7 @@
         }
 
         .card h3 {
-            font-size: 0.85em;
+            font-size: 0.9em;
             margin: 0;
             color: #666;
         }
@@ -101,14 +101,14 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 450px;
+            min-width: 350px;
         }
 
         td,
         th {
-            padding: 10px 8px;
+            padding: 8px;
             border-bottom: 1px solid #eee;
-            font-size: 0.85em;
+            font-size: 0.8em;
             text-align: left;
         }
 
@@ -144,7 +144,7 @@
         input,
         select {
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             border: 1px solid #ccc;
             border-radius: 6px;
             font-size: 16px;
@@ -159,7 +159,6 @@
             border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 1em;
         }
 
         @media (min-width: 768px) {
@@ -189,9 +188,9 @@
 
     <div class="container">
         <div class="header-actions">
-            <div style="flex: 1;">
-                <label>Selecionar Data:</label>
-                <input type="date" id="filtroData" onchange="atualizarInterface()">
+            <div style="text-align:center">
+                <label>Mês:</label>
+                <input type="month" id="filtroMes" onchange="atualizarInterface()">
             </div>
             <div class="button-group">
                 <button style="background:var(--pdf-color);color:white" onclick="gerarPDF()">📄 PDF</button>
@@ -200,29 +199,27 @@
         </div>
 
         <div id="area-foto" style="padding: 10px; background-color: var(--bg);">
-            <h2
-                style="text-align: center; color: var(--primary); font-size: 1.2em; margin-top: 0; margin-bottom: 15px;">
-                Relatório Beatriz & Milena
-            </h2>
+            <h2 style="text-align: center; color: var(--primary); font-size: 1.1em; margin-top: 0;">Relatório Beatriz &
+                Milena</h2>
 
             <div class="dashboard-cards">
-                <div class="card" style="border-top-color: var(--primary)">
+                <div class="card">
                     <h3>Total</h3>
                     <p id="totalGeral">R$ 0,00</p>
                 </div>
-                <div class="card" style="border-top-color: var(--success)">
+                <div class="card" style="border-top-color: var(--success);">
                     <h3>Dinheiro</h3>
                     <p id="totalDinheiro">R$ 0,00</p>
                 </div>
-                <div class="card" style="border-top-color: var(--pix)">
+                <div class="card" style="border-top-color: var(--pix);">
                     <h3>PIX</h3>
                     <p id="totalPix">R$ 0,00</p>
                 </div>
-                <div class="card" style="border-top-color: #ffc107">
+                <div class="card">
                     <h3>Crédito</h3>
                     <p id="totalCredito">R$ 0,00</p>
                 </div>
-                <div class="card" style="border-top-color: #fd7e14">
+                <div class="card">
                     <h3>Débito</h3>
                     <p id="totalDebito">R$ 0,00</p>
                 </div>
@@ -232,7 +229,7 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Hora</th>
+                            <th>Data</th>
                             <th>Prod.</th>
                             <th>Vend.</th>
                             <th>Pgto.</th>
@@ -280,9 +277,8 @@
         const SUPABASE_KEY = 'sb_publishable_RuAKM7NKPwoFWFK-CsvQwQ_wzpmjapZ';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Inicializa o filtro com a data de hoje (YYYY-MM-DD)
-        const inputFiltro = document.getElementById('filtroData');
-        inputFiltro.value = new Date().toISOString().split('T')[0];
+        const inputFiltro = document.getElementById('filtroMes');
+        inputFiltro.value = new Date().toISOString().substring(0, 7);
 
         async function adicionarVenda() {
             const prod = document.getElementById('produto').value;
@@ -294,13 +290,12 @@
             btn.innerText = "Salvando...";
 
             const agora = new Date();
-            // Salva o período como data completa para permitir filtro diário
-            const periodoDia = agora.toISOString().split('T')[0];
-            const horaFormatada = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            const dataFormatada = agora.toLocaleDateString('pt-BR').substring(0, 5) + ' ' +
+                agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
             const { error } = await _supabase.from('vendas').insert([{
-                periodo: periodoDia, // Agora guarda o dia (2026-04-25)
-                data_hora: horaFormatada,
+                periodo: agora.toISOString().substring(0, 7),
+                data_hora: dataFormatada,
                 produto: prod,
                 valor: val,
                 vendedor: document.getElementById('vendedor').value,
@@ -321,7 +316,7 @@
         async function atualizarInterface() {
             const { data: vendas, error } = await _supabase.from('vendas')
                 .select('*')
-                .eq('periodo', inputFiltro.value) // Filtra pelo dia selecionado
+                .eq('periodo', inputFiltro.value)
                 .order('id', { ascending: false });
 
             if (error) return console.error(error);
@@ -339,8 +334,14 @@
                     <td><strong>R$ ${v.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong></td>
                     <td class="no-print" onclick="excluirVenda(${v.id})" style="color:var(--danger);cursor:pointer;text-align:center">🗑️</td>
                 </tr>`;
+
                 totais.Geral += v.valor;
-                if (totais[v.pagamento] !== undefined) totais[v.pagamento] += v.valor;
+
+                // Normalização para evitar problemas com acentos (Crédito vs Credito)
+                let p = v.pagamento;
+                if (totais[p] !== undefined) {
+                    totais[p] += v.valor;
+                }
             });
 
             document.getElementById('totalGeral').innerText = "R$ " + totais.Geral.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
@@ -357,7 +358,6 @@
             }
         }
 
-        // --- EXPORTAÇÃO ---
         async function gerarImagem() {
             const area = document.getElementById('area-foto');
             const noPrint = document.querySelectorAll('.no-print');
@@ -398,6 +398,7 @@
         }
 
         atualizarInterface();
+        setInterval(atualizarInterface, 30000); 
     </script>
 </body>
 
