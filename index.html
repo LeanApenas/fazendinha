@@ -316,7 +316,7 @@
         async function atualizarInterface() {
             const mesSelecionado = inputFiltro.value; // Ex: "2026-04"
 
-            // Buscamos todas as vendas que COMEÇAM com o mês selecionado
+            // Busca todas as vendas que começam com o mês selecionado
             const { data: vendas, error } = await _supabase.from('vendas')
                 .select('*')
                 .like('periodo', `${mesSelecionado}%`)
@@ -326,7 +326,15 @@
 
             const lista = document.getElementById('listaVendas');
             lista.innerHTML = '';
-            let totais = { Geral: 0, Dinheiro: 0, PIX: 0, Crédito: 0, Débito: 0 };
+
+            // Inicializamos os totais zerados
+            let totais = {
+                Geral: 0,
+                Dinheiro: 0,
+                PIX: 0,
+                Crédito: 0,
+                Débito: 0
+            };
 
             vendas.forEach(v => {
                 lista.innerHTML += `<tr>
@@ -338,15 +346,25 @@
             <td class="no-print" onclick="excluirVenda(${v.id})" style="color:var(--danger);cursor:pointer;text-align:center">🗑️</td>
         </tr>`;
 
-                totais.Geral += v.valor;
+                // Soma o valor total geral
+                totais.Geral += parseFloat(v.valor);
 
-                // Soma o pagamento se ele existir no nosso objeto de totais
-                if (totais[v.pagamento] !== undefined) {
-                    totais[v.pagamento] += v.valor;
+                // CORREÇÃO DA SOMA: 
+                // Convertemos o texto do banco para "Minúsculo" e removemos espaços para comparar sem erro
+                const pgtoLimpado = v.pagamento.trim().toLowerCase();
+
+                if (pgtoLimpado === "dinheiro") {
+                    totais.Dinheiro += parseFloat(v.valor);
+                } else if (pgtoLimpado === "pix") {
+                    totais.PIX += parseFloat(v.valor);
+                } else if (pgtoLimpado === "crédito" || pgtoLimpado === "credito") {
+                    totais.Crédito += parseFloat(v.valor);
+                } else if (pgtoLimpado === "débito" || pgtoLimpado === "debito") {
+                    totais.Débito += parseFloat(v.valor);
                 }
             });
 
-            // Atualiza os cartões na tela
+            // Atualiza os cartões na tela com os valores exatos
             document.getElementById('totalGeral').innerText = "R$ " + totais.Geral.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
             document.getElementById('totalDinheiro').innerText = "R$ " + totais.Dinheiro.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
             document.getElementById('totalPix').innerText = "R$ " + totais.PIX.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
