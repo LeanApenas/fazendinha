@@ -15,7 +15,6 @@
             --danger: #dc3545;
             --accent: #6f42c1;
             --pix: #17a2b8;
-            --pdf-color: #17a2b8;
             --bg: #f4f7f9;
         }
 
@@ -35,9 +34,10 @@
             margin: auto;
         }
 
+        /* Cabeçalho com Calendário */
         .header-actions {
             background: white;
-            padding: 10px;
+            padding: 15px;
             border-radius: 8px;
             margin-bottom: 15px;
             display: flex;
@@ -60,8 +60,10 @@
             border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
+            color: white;
         }
 
+        /* Cartões de Resumo */
         .dashboard-cards {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -78,7 +80,7 @@
         }
 
         .card h3 {
-            font-size: 0.9em;
+            font-size: 0.85em;
             margin: 0;
             color: #666;
         }
@@ -90,6 +92,7 @@
             color: var(--primary);
         }
 
+        /* Tabela de Vendas */
         .history-section {
             background: white;
             padding: 10px;
@@ -101,17 +104,18 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 350px;
+            min-width: 450px;
         }
 
         td,
         th {
-            padding: 8px;
+            padding: 10px 8px;
             border-bottom: 1px solid #eee;
-            font-size: 0.8em;
+            font-size: 0.85em;
             text-align: left;
         }
 
+        /* Formulário de Input */
         .input-section {
             background: #fff;
             padding: 15px;
@@ -144,7 +148,7 @@
         input,
         select {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             border: 1px solid #ccc;
             border-radius: 6px;
             font-size: 16px;
@@ -159,6 +163,7 @@
             border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
+            font-size: 1em;
         }
 
         @media (min-width: 768px) {
@@ -188,38 +193,40 @@
 
     <div class="container">
         <div class="header-actions">
-            <div style="text-align:center">
-                <label>Mês:</label>
-                <input type="month" id="filtroMes" onchange="atualizarInterface()">
+            <div style="flex: 1;">
+                <label>Selecionar Dia/Mês/Ano:</label>
+                <input type="date" id="filtroData" onchange="atualizarInterface()">
             </div>
             <div class="button-group">
-                <button style="background:var(--pdf-color);color:white" onclick="gerarPDF()">📄 PDF</button>
-                <button style="background:var(--accent);color:white" onclick="gerarImagem()">📸 FOTO</button>
+                <button style="background:var(--pix);" onclick="gerarPDF()">📄 PDF</button>
+                <button style="background:var(--accent);" onclick="gerarImagem()">📸 FOTO</button>
             </div>
         </div>
 
         <div id="area-foto" style="padding: 10px; background-color: var(--bg);">
-            <h2 style="text-align: center; color: var(--primary); font-size: 1.1em; margin-top: 0;">Relatório Beatriz &
-                Milena</h2>
+            <h2
+                style="text-align: center; color: var(--primary); font-size: 1.2em; margin-top: 0; margin-bottom: 15px;">
+                Relatório Beatriz & Milena
+            </h2>
 
             <div class="dashboard-cards">
-                <div class="card">
+                <div class="card" style="border-top-color: var(--primary)">
                     <h3>Total</h3>
                     <p id="totalGeral">R$ 0,00</p>
                 </div>
-                <div class="card" style="border-top-color: var(--success);">
+                <div class="card" style="border-top-color: var(--success)">
                     <h3>Dinheiro</h3>
                     <p id="totalDinheiro">R$ 0,00</p>
                 </div>
-                <div class="card" style="border-top-color: var(--pix);">
+                <div class="card" style="border-top-color: var(--pix)">
                     <h3>PIX</h3>
                     <p id="totalPix">R$ 0,00</p>
                 </div>
-                <div class="card">
+                <div class="card" style="border-top-color: #ffc107">
                     <h3>Crédito</h3>
                     <p id="totalCredito">R$ 0,00</p>
                 </div>
-                <div class="card">
+                <div class="card" style="border-top-color: #fd7e14">
                     <h3>Débito</h3>
                     <p id="totalDebito">R$ 0,00</p>
                 </div>
@@ -229,7 +236,7 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Data</th>
+                            <th>Hora/Data</th>
                             <th>Prod.</th>
                             <th>Vend.</th>
                             <th>Pgto.</th>
@@ -272,13 +279,14 @@
     </div>
 
     <script>
-        // --- CONFIGURAÇÃO SUPABASE ---
+        // CONFIGURAÇÃO SUPABASE
         const SUPABASE_URL = 'https://wqlegyymfygzfvclglng.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_RuAKM7NKPwoFWFK-CsvQwQ_wzpmjapZ';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        const inputFiltro = document.getElementById('filtroMes');
-        inputFiltro.value = new Date().toISOString().substring(0, 7);
+        // Inicia com a data de HOJE no calendário
+        const inputFiltro = document.getElementById('filtroData');
+        inputFiltro.value = new Date().toISOString().split('T')[0];
 
         async function adicionarVenda() {
             const prod = document.getElementById('produto').value;
@@ -290,12 +298,12 @@
             btn.innerText = "Salvando...";
 
             const agora = new Date();
-            const dataFormatada = agora.toLocaleDateString('pt-BR').substring(0, 5) + ' ' +
-                agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            const dataCompleta = agora.toISOString().split('T')[0]; // YYYY-MM-DD
+            const horaFormatada = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
             const { error } = await _supabase.from('vendas').insert([{
-                periodo: agora.toISOString().substring(0, 7),
-                data_hora: dataFormatada,
+                periodo: dataCompleta,
+                data_hora: horaFormatada,
                 produto: prod,
                 valor: val,
                 vendedor: document.getElementById('vendedor').value,
@@ -314,57 +322,43 @@
         }
 
         async function atualizarInterface() {
-            const mesSelecionado = inputFiltro.value; // Ex: "2026-04"
+            const dataFiltro = inputFiltro.value;
 
-            // Busca todas as vendas que começam com o mês selecionado
+            // Buscamos as vendas. Usamos LIKE para pegar tanto os registros de dia 
+            // quanto os registros antigos que só tinham mês (se coincidir o início)
             const { data: vendas, error } = await _supabase.from('vendas')
                 .select('*')
-                .like('periodo', `${mesSelecionado}%`)
+                .like('periodo', `${dataFiltro}%`)
                 .order('id', { ascending: false });
 
             if (error) return console.error(error);
 
             const lista = document.getElementById('listaVendas');
             lista.innerHTML = '';
-
-            // Inicializamos os totais zerados
-            let totais = {
-                Geral: 0,
-                Dinheiro: 0,
-                PIX: 0,
-                Crédito: 0,
-                Débito: 0
-            };
+            let totais = { Geral: 0, Dinheiro: 0, PIX: 0, Crédito: 0, Débito: 0 };
 
             vendas.forEach(v => {
                 lista.innerHTML += `<tr>
-            <td>${v.data_hora}</td>
-            <td>${v.produto}</td>
-            <td>${v.vendedor}</td>
-            <td>${v.pagamento}</td>
-            <td><strong>R$ ${v.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong></td>
-            <td class="no-print" onclick="excluirVenda(${v.id})" style="color:var(--danger);cursor:pointer;text-align:center">🗑️</td>
-        </tr>`;
+                    <td>${v.data_hora}</td>
+                    <td>${v.produto}</td>
+                    <td>${v.vendedor}</td>
+                    <td>${v.pagamento}</td>
+                    <td><strong>R$ ${v.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong></td>
+                    <td class="no-print" onclick="excluirVenda(${v.id})" style="color:var(--danger);cursor:pointer;text-align:center">🗑️</td>
+                </tr>`;
 
-                // Soma o valor total geral
-                totais.Geral += parseFloat(v.valor);
+                const valorNum = parseFloat(v.valor);
+                totais.Geral += valorNum;
 
-                // CORREÇÃO DA SOMA: 
-                // Convertemos o texto do banco para "Minúsculo" e removemos espaços para comparar sem erro
-                const pgtoLimpado = v.pagamento.trim().toLowerCase();
-
-                if (pgtoLimpado === "dinheiro") {
-                    totais.Dinheiro += parseFloat(v.valor);
-                } else if (pgtoLimpado === "pix") {
-                    totais.PIX += parseFloat(v.valor);
-                } else if (pgtoLimpado === "crédito" || pgtoLimpado === "credito") {
-                    totais.Crédito += parseFloat(v.valor);
-                } else if (pgtoLimpado === "débito" || pgtoLimpado === "debito") {
-                    totais.Débito += parseFloat(v.valor);
-                }
+                // Normalização do texto para soma correta (PIX, pix, Pix, etc)
+                const pgto = v.pagamento.trim().toLowerCase();
+                if (pgto === "dinheiro") totais.Dinheiro += valorNum;
+                else if (pgto === "pix") totais.PIX += valorNum;
+                else if (pgto === "crédito" || pgto === "credito") totais.Crédito += valorNum;
+                else if (pgto === "débito" || pgto === "debito") totais.Débito += valorNum;
             });
 
-            // Atualiza os cartões na tela com os valores exatos
+            // Atualiza os cartões
             document.getElementById('totalGeral').innerText = "R$ " + totais.Geral.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
             document.getElementById('totalDinheiro').innerText = "R$ " + totais.Dinheiro.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
             document.getElementById('totalPix').innerText = "R$ " + totais.PIX.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
@@ -379,19 +373,17 @@
             }
         }
 
+        // Funções de exportação
         async function gerarImagem() {
             const area = document.getElementById('area-foto');
             const noPrint = document.querySelectorAll('.no-print');
             noPrint.forEach(el => el.style.display = 'none');
-
             try {
                 const canvas = await html2canvas(area, { scale: 2, useCORS: true, backgroundColor: "#f4f7f9" });
                 const link = document.createElement('a');
                 link.download = `relatorio-${inputFiltro.value}.png`;
                 link.href = canvas.toDataURL("image/png");
                 link.click();
-            } catch (err) {
-                alert("Erro ao gerar imagem: " + err);
             } finally {
                 noPrint.forEach(el => el.style.display = '');
             }
@@ -401,7 +393,6 @@
             const area = document.getElementById('area-foto');
             const noPrint = document.querySelectorAll('.no-print');
             noPrint.forEach(el => el.style.display = 'none');
-
             const opt = {
                 margin: 5,
                 filename: `relatorio-${inputFiltro.value}.pdf`,
@@ -409,17 +400,13 @@
                 html2canvas: { scale: 2, useCORS: true },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
-
             html2pdf().set(opt).from(area).save().then(() => {
-                noPrint.forEach(el => el.style.display = '');
-            }).catch(err => {
-                alert("Erro ao gerar PDF: " + err);
                 noPrint.forEach(el => el.style.display = '');
             });
         }
 
+        // Carregamento inicial
         atualizarInterface();
-        setInterval(atualizarInterface, 30000); 
     </script>
 </body>
 
