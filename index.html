@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Beatriz & Milena</title>
+    <title>Sistema Beatriz & Milena - Diário</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -12,6 +12,7 @@
         :root {
             --primary: #2f75b5;
             --bg: #f4f7f9;
+            --accent: #7030a0;
         }
 
         body {
@@ -55,19 +56,32 @@
             margin-bottom: 25px;
         }
 
-        /* Layout de 4 Cartões + PIX na lateral */
-        .dashboard-container {
+        .btn-export {
+            padding: 10px 15px;
+            cursor: pointer;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-weight: bold;
             display: flex;
-            gap: 20px;
-            align-items: flex-start;
-            margin-bottom: 30px;
+            align-items: center;
+            gap: 5px;
         }
 
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
+        .btn-pdf {
+            background: #17a2b8;
+        }
+
+        .btn-foto {
+            background: #6f42c1;
+        }
+
+        /* Dashboard */
+        .dashboard-container {
+            display: flex;
             gap: 15px;
-            flex: 1;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
         }
 
         .card {
@@ -76,6 +90,8 @@
             border-radius: 8px;
             text-align: center;
             border: 1.5px solid var(--primary);
+            flex: 1;
+            min-width: 120px;
         }
 
         .card h3 {
@@ -94,16 +110,14 @@
             color: var(--primary);
         }
 
-        /* Caixa do PIX destacada */
         .pix-box {
-            width: 140px;
             border: 2px solid #000;
-            padding: 15px 5px;
+            padding: 15px 10px;
             text-align: center;
-            align-self: stretch;
             display: flex;
             flex-direction: column;
             justify-content: center;
+            min-width: 120px;
         }
 
         .pix-box strong {
@@ -114,14 +128,44 @@
             font-size: 1.2em;
             font-weight: bold;
             color: var(--primary);
-            margin-top: 5px;
         }
 
-        /* Tabela de Atalhos de Produtos */
+        /* Tabela */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px;
+            font-size: 0.9em;
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            font-size: 0.9em;
+        }
+
+        .btn-del {
+            cursor: pointer;
+            opacity: 0.3;
+        }
+
+        .btn-del:hover {
+            opacity: 1;
+            color: red;
+        }
+
+        /* Cadastro e Atalhos */
         .atalhos-container {
             max-width: 1100px;
             margin: 20px auto;
-            background: #e9ecef;
+            background: #fff;
             padding: 15px;
             border-radius: 12px;
             border: 1px dashed var(--primary);
@@ -129,61 +173,23 @@
 
         .atalhos-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
             gap: 10px;
         }
 
         .btn-atalho {
-            padding: 10px;
-            border: 1px solid var(--primary);
-            background: white;
+            padding: 8px;
+            border: 1px solid #ddd;
+            background: #f9f9f9;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 0.85em;
-            text-align: center;
-        }
-
-        .btn-atalho:hover {
-            background: #f0f7ff;
+            font-size: 0.8em;
         }
 
         .btn-atalho b {
-            display: block;
             color: #d9534f;
-            margin-top: 3px;
         }
 
-        /* Tabela de Vendas */
-        .history-section {
-            overflow-x: auto;
-            margin-top: 20px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th {
-            text-align: left;
-            padding: 10px;
-            font-size: 0.85em;
-            color: #333;
-            border-bottom: 2px solid #eee;
-        }
-
-        td {
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-            font-size: 0.85em;
-        }
-
-        .btn-del {
-            cursor: pointer;
-            opacity: 0.5;
-        }
-
-        /* Área de Cadastro */
         .input-area {
             max-width: 1100px;
             margin: 20px auto;
@@ -221,93 +227,91 @@
             border-radius: 6px;
             font-weight: bold;
             cursor: pointer;
-            font-size: 1em;
         }
 
-        .no-print {
-            display: inline-block;
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+
+            #area-relatorio {
+                box-shadow: none;
+                border: none;
+            }
         }
     </style>
 </head>
 
 <body>
 
-    <div class="header-top">
+    <div class="header-top no-print">
         <div class="filtro-container">
-            <label>Mês:</label>
-            <input type="month" id="filtroMes" onchange="atualizarInterface()">
+            <label>Filtrar por Dia:</label>
+            <input type="date" id="filtroDia" onchange="atualizarInterface()">
         </div>
-        <div class="no-print">
-            <button onclick="window.print()" style="padding: 10px; cursor: pointer;">📄 Imprimir Relatório</button>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn-export btn-pdf" onclick="exportarPDF()">📄 PDF</button>
+            <button class="btn-export btn-foto" onclick="exportarFoto()">📸 FOTO</button>
         </div>
     </div>
 
     <div id="area-relatorio">
-        <h2>Relatório Beatriz & Milena</h2>
+        <h2 id="tituloRelatorio">Relatório de Vendas</h2>
 
         <div class="dashboard-container">
-            <div class="cards-grid">
-                <div class="card">
-                    <h3>Total</h3>
-                    <p id="totalGeral">R$ 0,00</p>
-                </div>
-                <div class="card">
-                    <h3>Dinheiro</h3>
-                    <p id="totalDinheiro">R$ 0,00</p>
-                </div>
-                <div class="card">
-                    <h3>Crédito</h3>
-                    <p id="totalCredito">R$ 0,00</p>
-                </div>
-                <div class="card">
-                    <h3>Débito</h3>
-                    <p id="totalDebito">R$ 0,00</p>
-                </div>
+            <div class="card">
+                <h3>Total Dia</h3>
+                <p id="totalGeral">R$ 0,00</p>
             </div>
-
+            <div class="card">
+                <h3>Dinheiro</h3>
+                <p id="totalDinheiro">R$ 0,00</p>
+            </div>
+            <div class="card">
+                <h3>Crédito</h3>
+                <p id="totalCredito">R$ 0,00</p>
+            </div>
+            <div class="card">
+                <h3>Débito</h3>
+                <p id="totalDebito">R$ 0,00</p>
+            </div>
             <div class="pix-box">
                 <strong>PIX</strong>
                 <span id="totalPix">R$ 0,00</span>
             </div>
         </div>
 
-        <div class="history-section">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Data</th>
-                        <th>Prod.</th>
-                        <th>Vend.</th>
-                        <th>Pgto.</th>
-                        <th>Valor</th>
-                        <th class="no-print"></th>
-                    </tr>
-                </thead>
-                <tbody id="listaVendas"></tbody>
-            </table>
-        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Hora</th>
+                    <th>Produto</th>
+                    <th>Vendedor</th>
+                    <th>Pagamento</th>
+                    <th>Valor</th>
+                    <th class="no-print"></th>
+                </tr>
+            </thead>
+            <tbody id="listaVendas"></tbody>
+        </table>
     </div>
 
-    <div class="atalhos-container">
-        <p style="margin: 0 0 10px 0; font-weight: bold; color: var(--primary);">Produtos Rápidos (Clique para
-            preencher):</p>
+    <div class="atalhos-container no-print">
         <div class="atalhos-grid">
-            <button class="btn-atalho" onclick="preencher('cenoura', 15.00)">cenoura <b>R$ 15,00</b></button>
-            <button class="btn-atalho" onclick="preencher('cesta', 45.00)">cesta <b>R$ 45,00</b></button>
-            <button class="btn-atalho" onclick="preencher('caixotinho', 30.00)">caixotinho <b>R$ 30,00</b></button>
-            <button class="btn-atalho" onclick="preencher('alfafa', 15.00)">alfafa <b>R$ 15,00</b></button>
-            <button class="btn-atalho" onclick="preencher('aluguel de carrinho', 35.00)">aluguel <b>R$
-                    35,00</b></button>
-            <button class="btn-atalho" onclick="preencher('Squany aogel', 33.00)">Squany aogel <b>R$ 33,00</b></button>
+            <button class="btn-atalho" onclick="preencher('cenoura', 15)">cenoura <b>R$ 15</b></button>
+            <button class="btn-atalho" onclick="preencher('cesta', 45)">cesta <b>R$ 45</b></button>
+            <button class="btn-atalho" onclick="preencher('caixotinho', 30)">caixotinho <b>R$ 30</b></button>
+            <button class="btn-atalho" onclick="preencher('alfafa', 15)">alfafa <b>R$ 15</b></button>
+            <button class="btn-atalho" onclick="preencher('aluguel', 35)">aluguel <b>R$ 35</b></button>
+            <button class="btn-atalho" onclick="preencher('Squany aogel', 33)">Squany <b>R$ 33</b></button>
         </div>
     </div>
 
-    <div class="input-area">
+    <div class="input-area no-print">
         <div class="input-row">
-            <div class="input-group"><label>Produto</label><input type="text" id="produto"
-                    placeholder="Nome do produto"></div>
-            <div class="input-group" style="flex:0.3"><label>Valor</label><input type="number" id="valor" step="0.01"
-                    placeholder="0,00"></div>
+            <div class="input-group"><label>Produto</label><input type="text" id="produto"></div>
+            <div class="input-group" style="flex:0.3"><label>Valor</label><input type="number" id="valor" step="0.01">
+            </div>
         </div>
         <div class="input-row">
             <div class="input-group">
@@ -335,38 +339,32 @@
         const SUPABASE_KEY = 'sb_publishable_RuAKM7NKPwoFWFK-CsvQwQ_wzpmjapZ';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        const inputFiltro = document.getElementById('filtroMes');
-        inputFiltro.value = "2026-04"; // Define abril de 2026 como padrão inicial
+        // Define a data de hoje como padrão no filtro
+        const campoData = document.getElementById('filtroDia');
+        const hoje = new Date().toISOString().split('T')[0];
+        campoData.value = hoje;
 
-        // Função para preencher automaticamente os campos
-        function preencher(nome, preco) {
-            document.getElementById('produto').value = nome;
-            document.getElementById('valor').value = preco;
-            document.getElementById('pagamento').focus();
-        }
+        function preencher(n, v) { document.getElementById('produto').value = n; document.getElementById('valor').value = v; }
 
         async function adicionarVenda() {
             const prod = document.getElementById('produto').value;
             const val = parseFloat(document.getElementById('valor').value);
-            if (!prod || isNaN(val)) return alert("Preencha o produto e o valor!");
+            if (!prod || isNaN(val)) return alert("Dados inválidos");
 
             const btn = document.getElementById('btnSalvar');
             btn.disabled = true;
 
             const agora = new Date();
-            const dataHora = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-
             const { error } = await _supabase.from('vendas').insert([{
-                periodo: agora.toISOString().substring(0, 10), // Salva como 2026-04-25
-                data_hora: dataHora,
+                periodo: campoData.value, // Salva na data que está selecionada no filtro
+                data_hora: agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
                 produto: prod,
                 valor: val,
                 vendedor: document.getElementById('vendedor').value,
                 pagamento: document.getElementById('pagamento').value
             }]);
 
-            if (error) alert("Erro: " + error.message);
-            else {
+            if (!error) {
                 document.getElementById('produto').value = '';
                 document.getElementById('valor').value = '';
                 atualizarInterface();
@@ -375,52 +373,64 @@
         }
 
         async function atualizarInterface() {
-            const mesSelecionado = inputFiltro.value; // Ex: "2026-04"
+            const dataSel = campoData.value;
+            const dataBR = dataSel.split('-').reverse().join('/');
+            document.getElementById('tituloRelatorio').innerText = `Relatório - Dia ${dataBR}`;
 
-            // Busca todas as vendas que COMEÇAM com o mês selecionado
             const { data: vendas, error } = await _supabase.from('vendas')
                 .select('*')
-                .filter('periodo', 'ilike', `${mesSelecionado}%`)
+                .eq('periodo', dataSel)
                 .order('id', { ascending: false });
-
-            if (error) return;
 
             const lista = document.getElementById('listaVendas');
             lista.innerHTML = '';
-            let totais = { Geral: 0, Dinheiro: 0, PIX: 0, Credito: 0, Debito: 0 };
+            let t = { total: 0, din: 0, pix: 0, cre: 0, deb: 0 };
 
-            vendas.forEach(v => {
-                const valorNumerico = parseFloat(v.valor);
+            if (vendas) {
+                vendas.forEach(v => {
+                    const val = parseFloat(v.valor);
+                    t.total += val;
+                    const p = v.pagamento.toLowerCase();
+                    if (p === 'dinheiro') t.din += val;
+                    else if (p === 'pix') t.pix += val;
+                    else if (p.includes('cré')) t.cre += val;
+                    else if (p.includes('déb')) t.deb += val;
 
-                lista.innerHTML += `<tr>
-                    <td>${v.data_hora}</td>
-                    <td>${v.produto}</td>
-                    <td>${v.vendedor}</td>
-                    <td>${v.pagamento}</td>
-                    <td><strong>R$ ${valorNumerico.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong></td>
-                    <td class="no-print btn-del" onclick="excluir(${v.id})">🗑️</td>
-                </tr>`;
+                    lista.innerHTML += `<tr>
+                        <td>${v.data_hora}</td>
+                        <td>${v.produto}</td>
+                        <td>${v.vendedor}</td>
+                        <td>${v.pagamento}</td>
+                        <td><b>R$ ${val.toFixed(2)}</b></td>
+                        <td class="no-print btn-del" onclick="excluir(${v.id})">🗑️</td>
+                    </tr>`;
+                });
+            }
 
-                totais.Geral += valorNumerico;
-                const p = v.pagamento.toLowerCase();
-                if (p === "dinheiro") totais.Dinheiro += valorNumerico;
-                else if (p === "pix") totais.PIX += valorNumerico;
-                else if (p.includes("crédito") || p.includes("credito")) totais.Credito += valorNumerico;
-                else if (p.includes("débito") || p.includes("debito")) totais.Debito += valorNumerico;
-            });
-
-            document.getElementById('totalGeral').innerText = "R$ " + totais.Geral.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-            document.getElementById('totalDinheiro').innerText = "R$ " + totais.Dinheiro.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-            document.getElementById('totalPix').innerText = "R$ " + totais.PIX.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-            document.getElementById('totalCredito').innerText = "R$ " + totais.Credito.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-            document.getElementById('totalDebito').innerText = "R$ " + totais.Debito.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+            const f = (n) => "R$ " + n.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+            document.getElementById('totalGeral').innerText = f(t.total);
+            document.getElementById('totalDinheiro').innerText = f(t.din);
+            document.getElementById('totalPix').innerText = f(t.pix);
+            document.getElementById('totalCredito').innerText = f(t.cre);
+            document.getElementById('totalDebito').innerText = f(t.deb);
         }
 
-        async function excluir(id) {
-            if (confirm("Excluir esta venda?")) {
-                await _supabase.from('vendas').delete().eq('id', id);
-                atualizarInterface();
-            }
+        async function excluir(id) { if (confirm("Excluir?")) { await _supabase.from('vendas').delete().eq('id', id); atualizarInterface(); } }
+
+        function exportarPDF() {
+            const elemento = document.getElementById('area-relatorio');
+            const opt = { margin: 10, filename: `Relatorio_${campoData.value}.pdf`, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
+            html2pdf().set(opt).from(elemento).save();
+        }
+
+        function exportarFoto() {
+            const elemento = document.getElementById('area-relatorio');
+            html2canvas(elemento).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `Relatorio_${campoData.value}.png`;
+                link.href = canvas.toDataURL();
+                link.click();
+            });
         }
 
         atualizarInterface();
